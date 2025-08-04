@@ -1,0 +1,97 @@
+.header {
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+
+.logo {
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #3b82f6;
+    cursor: pointer;
+    
+    &:hover {
+      color: #2563eb;
+    }
+  }
+}
+
+.navigation {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navList {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 32px;
+}
+
+.navLink {
+  text-decoration: none;
+  color: #374151;
+  font-weight: 500;
+  font-size: 16px;
+  transition: color 0.2s ease-in-out;
+  
+  &:hover {
+    color: #3b82f6;
+  }
+  
+  &:active {
+    color: #2563eb;
+  }
+}
+
+.authButtons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  .navList {
+    gap: 20px;
+  }
+  
+  .navLink {
+    font-size: 14px;
+  }
+  
+  .authButtons {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .navigation {
+    display: none;
+  }
+  
+  .container {
+    justify-content: space-between;
+  }
+} 

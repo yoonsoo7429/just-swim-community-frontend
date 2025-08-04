@@ -1,0 +1,23 @@
+.signUpButton {
+  // 기본 스타일은 Button 컴포넌트에서 상속
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.submitButton {
+  flex: 1;
+}
+
+.cancelButton {
+  flex: 1;
+} 
