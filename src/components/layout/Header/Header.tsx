@@ -4,12 +4,16 @@ import React from "react";
 import styles from "./styles.module.scss";
 import SignInButton from "../../auth/SignInButton";
 import SignUpButton from "../../auth/SignUpButton";
+import { useAuth } from "../../../hooks/useAuth";
+import Button from "../../ui/Button";
 
 interface HeaderProps {
   className?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ className = "" }) => {
+  const { user, signOut } = useAuth();
+
   const handleSignIn = (email: string, password: string) => {
     console.log("Sign in:", { email, password });
     // TODO: Implement sign in logic
@@ -22,6 +26,14 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
   ) => {
     console.log("Sign up:", { email, password, confirmPassword });
     // TODO: Implement sign up logic
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
@@ -53,17 +65,52 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                 커뮤니티
               </a>
             </li>
-            <li>
-              <a href="/profile" className={styles.navLink}>
-                내 프로필
-              </a>
-            </li>
+            {user && (
+              <li>
+                <a href="/profile" className={styles.navLink}>
+                  내 프로필
+                </a>
+              </li>
+            )}
           </ul>
         </nav>
 
         <div className={styles.authButtons}>
-          <SignInButton onSignIn={handleSignIn} />
-          <SignUpButton onSignUp={handleSignUp} />
+          {user ? (
+            // 로그인된 경우: 마이페이지와 로그아웃 버튼
+            <>
+              <div className={styles.userInfo}>
+                <span className={styles.userName}>{user.name}</span>
+                {user.profileImage && (
+                  <img
+                    src={user.profileImage}
+                    alt={user.name}
+                    className={styles.userAvatar}
+                  />
+                )}
+              </div>
+              <Button
+                variant="secondary"
+                onClick={() => (window.location.href = "/profile")}
+                className={styles.profileButton}
+              >
+                마이페이지
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className={styles.logoutButton}
+              >
+                로그아웃
+              </Button>
+            </>
+          ) : (
+            // 로그인되지 않은 경우: 로그인/회원가입 버튼
+            <>
+              <SignInButton onSignIn={handleSignIn} />
+              <SignUpButton onSignUp={handleSignUp} />
+            </>
+          )}
         </div>
       </div>
     </header>
