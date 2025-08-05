@@ -1,11 +1,11 @@
 .container {
-  padding: 20px;
+  padding: 0; // 모달의 기본 패딩 사용
 }
 
 .description {
   text-align: center;
   margin-bottom: 24px;
-  
+
   p {
     color: #666;
     font-size: 14px;
@@ -28,9 +28,9 @@
   position: relative;
   text-align: center;
   margin: 24px 0;
-  
+
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 0;
@@ -38,7 +38,7 @@
     height: 1px;
     background-color: #e0e0e0;
   }
-  
+
   span {
     background-color: white;
     padding: 0 16px;
@@ -50,12 +50,37 @@
 .emailOption {
   text-align: center;
   margin-bottom: 16px;
-  
+
   p {
     color: #999;
     font-size: 12px;
     margin: 0;
   }
+}
+
+.emailButton {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.emailForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.submitButton {
+  flex: 1;
+}
+
+.backButton {
+  flex: 1;
 }
 
 .notice {
@@ -65,7 +90,7 @@
   border-radius: 6px;
   padding: 12px;
   margin-bottom: 16px;
-  
+
   p {
     color: #856404;
     font-size: 12px;
@@ -76,10 +101,10 @@
 .loading {
   text-align: center;
   margin-top: 16px;
-  
+
   p {
     color: #666;
     font-size: 14px;
     margin: 0;
   }
-} 
+}

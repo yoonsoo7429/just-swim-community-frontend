@@ -16,7 +16,8 @@
 .modal {
   background-color: white;
   border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 90vw;
   max-height: 90vh;
   overflow: hidden;
@@ -25,7 +26,8 @@
 
 // Sizes
 .small {
-  width: 400px;
+  width: 450px; // 400px에서 450px로 증가
+  max-width: 90vw;
 }
 
 .medium {
@@ -60,12 +62,12 @@
   border-radius: 6px;
   color: #6b7280;
   transition: all 0.2s ease-in-out;
-  
+
   &:hover {
     background-color: #f3f4f6;
     color: #374151;
   }
-  
+
   &:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
@@ -73,7 +75,7 @@
 }
 
 .content {
-  padding: 24px;
+  padding: 20px 24px 24px 24px; // 상단 패딩을 줄여서 헤더와의 간격 조정
   overflow-y: auto;
   max-height: calc(90vh - 120px);
 }
@@ -97,4 +99,4 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-} 
+}

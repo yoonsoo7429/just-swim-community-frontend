@@ -1,24 +1,44 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { User } from "../types";
 import { authAPI } from "../utils/api";
 
-interface UseAuthReturn {
+interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isInitialized: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (
-    email: string,
-    password: string,
-    confirmPassword: string
-  ) => Promise<void>;
+  signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => void;
   socialLogin: (provider: "kakao" | "google" | "naver") => Promise<void>;
   updateUser: () => Promise<void>;
 }
 
-export const useAuth = (): UseAuthReturn => {
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const checkAuth = async () => {
     try {
@@ -26,12 +46,16 @@ export const useAuth = (): UseAuthReturn => {
       if (token) {
         const response = await authAPI.getProfile();
         setUser(response.data);
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error("Auth check failed:", error);
       localStorage.removeItem("access_token");
+      setUser(null);
     } finally {
       setIsLoading(false);
+      setIsInitialized(true);
     }
   };
 
@@ -54,8 +78,10 @@ export const useAuth = (): UseAuthReturn => {
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      console.log("Email/password login not implemented yet");
-      throw new Error("Email/password login not implemented yet");
+      const response = await authAPI.signin({ email, password });
+      localStorage.setItem("access_token", response.data.access_token);
+      setUser(response.data.user);
+      console.log("Sign in successful:", response.data.user);
     } catch (error) {
       console.error("Sign in failed:", error);
       throw error;
@@ -64,15 +90,13 @@ export const useAuth = (): UseAuthReturn => {
     }
   };
 
-  const signUp = async (
-    email: string,
-    password: string,
-    confirmPassword: string
-  ) => {
+  const signUp = async (email: string, password: string, name: string) => {
     try {
       setIsLoading(true);
-      console.log("Email/password signup not implemented yet");
-      throw new Error("Email/password signup not implemented yet");
+      const response = await authAPI.signup({ email, password, name });
+      localStorage.setItem("access_token", response.data.access_token);
+      setUser(response.data.user);
+      console.log("Sign up successful:", response.data.user);
     } catch (error) {
       console.error("Sign up failed:", error);
       throw error;
@@ -84,8 +108,6 @@ export const useAuth = (): UseAuthReturn => {
   const socialLogin = async (provider: "kakao" | "google" | "naver") => {
     try {
       setIsLoading(true);
-
-      // 직접 백엔드 OAuth 엔드포인트로 리다이렉트
       window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/${provider}`;
     } catch (error) {
       console.error("Social login failed:", error);
@@ -106,13 +128,16 @@ export const useAuth = (): UseAuthReturn => {
     }
   };
 
-  return {
+  const value = {
     user,
     isLoading,
+    isInitialized,
     signIn,
     signUp,
     signOut,
     socialLogin,
     updateUser,
   };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

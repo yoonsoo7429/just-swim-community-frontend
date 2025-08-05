@@ -45,6 +45,14 @@ export const authAPI = {
   // 사용자 정보 가져오기
   getProfile: () => apiClient.get("/auth/me"),
 
+  // 이메일/비밀번호 로그인
+  signin: (data: { email: string; password: string }) =>
+    apiClient.post("/auth/signin", data),
+
+  // 이메일/비밀번호 회원가입
+  signup: (data: { email: string; password: string; name: string }) =>
+    apiClient.post("/auth/signup", data),
+
   // 로그아웃
   logout: () => apiClient.get("/auth/logout"),
 };

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "../../../hooks/useAuth";
+import { useAuth } from "../../../contexts/AuthContext";
 import styles from "./page.module.scss";
 
 export default function AuthSuccessPage() {
@@ -15,12 +15,12 @@ export default function AuthSuccessPage() {
     const checkAuthStatus = async () => {
       try {
         // URL에서 토큰 가져오기
-        const token = searchParams.get('token');
-        
+        const token = searchParams.get("token");
+
         if (token) {
           // 토큰을 localStorage에 저장
-          localStorage.setItem('access_token', token);
-          
+          localStorage.setItem("access_token", token);
+
           // 잠시 대기 후 사용자 정보 확인
           setTimeout(async () => {
             try {

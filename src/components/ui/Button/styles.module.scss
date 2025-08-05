@@ -8,12 +8,12 @@
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   font-family: inherit;
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
-  
+
   &:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
@@ -24,11 +24,11 @@
 .primary {
   background-color: #3b82f6;
   color: white;
-  
+
   &:hover:not(:disabled) {
     background-color: #2563eb;
   }
-  
+
   &:active:not(:disabled) {
     background-color: #1d4ed8;
   }
@@ -37,11 +37,11 @@
 .secondary {
   background-color: #6b7280;
   color: white;
-  
+
   &:hover:not(:disabled) {
     background-color: #4b5563;
   }
-  
+
   &:active:not(:disabled) {
     background-color: #374151;
   }
@@ -51,12 +51,12 @@
   background-color: transparent;
   color: #3b82f6;
   border: 2px solid #3b82f6;
-  
+
   &:hover:not(:disabled) {
     background-color: #3b82f6;
     color: white;
   }
-  
+
   &:active:not(:disabled) {
     background-color: #2563eb;
     border-color: #2563eb;
@@ -71,7 +71,7 @@
 }
 
 .medium {
-  padding: 12px 24px;
+  padding: 12px 12px;
   font-size: 16px;
   min-height: 44px;
 }
@@ -80,4 +80,4 @@
   padding: 16px 32px;
   font-size: 18px;
   min-height: 52px;
-} 
+}

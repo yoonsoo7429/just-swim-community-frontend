@@ -1,18 +1,21 @@
 // Common types
 export interface User {
-  id: string;
+  id: number;
   email: string;
-  name?: string;
-  role: 'user' | 'admin' | 'instructor';
-  createdAt: Date;
-  updatedAt: Date;
+  name: string;
+  profileImage?: string;
+  provider: string;
+  providerId: string;
+  level: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Course {
   id: string;
   title: string;
   description: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
+  level: "beginner" | "intermediate" | "advanced";
   duration: number; // in minutes
   price: number;
   instructorId: string;
@@ -48,7 +51,7 @@ export interface Booking {
   userId: string;
   courseId: string;
   scheduleId: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
+  status: "pending" | "confirmed" | "cancelled";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,16 +80,16 @@ export interface SignUpForm {
 // UI Component props
 export interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "primary" | "secondary" | "outline";
+  size?: "small" | "medium" | "large";
   onClick?: () => void;
   disabled?: boolean;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
   className?: string;
 }
 
 export interface InputProps {
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+  type?: "text" | "email" | "password" | "number" | "tel" | "url";
   placeholder?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -99,7 +102,7 @@ export interface InputProps {
   className?: string;
   error?: string;
   label?: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
 }
 
 export interface ModalProps {
@@ -107,6 +110,6 @@ export interface ModalProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   showCloseButton?: boolean;
-} 
+}
