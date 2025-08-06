@@ -23,6 +23,32 @@
   font-weight: 600;
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.125rem;
+  color: #6b7280;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.retryButton {
+  margin-left: 1rem;
+}
+
 .filters {
   display: flex;
   gap: 0.5rem;
@@ -59,6 +85,32 @@
   gap: 1rem;
 }
 
+.emptyState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.125rem;
+  color: #6b7280;
+  text-align: center;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #d1d5db;
+}
+
+.submitting {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  margin-top: 1rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  color: #0369a1;
+  font-size: 0.875rem;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
@@ -73,6 +125,16 @@
   .title {
     font-size: 1.5rem;
     text-align: center;
+  }
+
+  .error {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .retryButton {
+    margin-left: 0;
   }
 
   .filters {

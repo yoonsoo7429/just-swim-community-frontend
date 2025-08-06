@@ -11,6 +11,95 @@ export interface User {
   updatedAt?: string;
 }
 
+// Community types
+export interface Post {
+  id: number;
+  title: string;
+  content: string;
+  author: User;
+  category: PostCategory;
+  likes: number;
+  comments: number;
+  createdAt: string;
+  updatedAt: string;
+  tags?: string[];
+  isLiked?: boolean;
+}
+
+export type PostCategory =
+  | "기록 공유"
+  | "팁 공유"
+  | "질문"
+  | "훈련 후기"
+  | "챌린지"
+  | "가이드";
+
+export interface Comment {
+  id: number;
+  content: string;
+  author: User;
+  postId: number;
+  createdAt: string;
+  updatedAt: string;
+  likes: number;
+  isLiked?: boolean;
+}
+
+export interface CommunityStats {
+  totalMembers: number;
+  todayPosts: number;
+  todayComments: number;
+  activeUsers: number;
+}
+
+export interface SwimmingRecord {
+  id: number;
+  userId: number;
+  distance: number; // meters
+  time: number; // seconds
+  stroke: "freestyle" | "backstroke" | "breaststroke" | "butterfly" | "medley";
+  date: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrainingProgram {
+  id: number;
+  title: string;
+  description: string;
+  author: User;
+  level: "beginner" | "intermediate" | "advanced";
+  duration: number; // weeks
+  sessions: TrainingSession[];
+  likes: number;
+  comments: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrainingSession {
+  id: number;
+  programId: number;
+  title: string;
+  description: string;
+  exercises: TrainingExercise[];
+  order: number;
+}
+
+export interface TrainingExercise {
+  id: number;
+  sessionId: number;
+  name: string;
+  description: string;
+  distance?: number;
+  time?: number;
+  sets?: number;
+  reps?: number;
+  rest?: number;
+  order: number;
+}
+
 export interface Course {
   id: string;
   title: string;

@@ -1,77 +1,71 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../../components/layout/Layout";
 import RecordForm from "../../components/records/RecordForm/RecordForm";
 import RecordCard from "../../components/records/RecordCard/RecordCard";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
+import { swimmingAPI } from "../../utils/api";
+import { useAuth } from "../../contexts/AuthContext";
 import styles from "./page.module.scss";
 
-// 임시 데이터
-const mockRecords = [
-  {
-    id: "1",
-    distance: 100,
-    time: "01:45",
-    stroke: "freestyle",
-    description: "오늘은 자유형 100m를 1분 45초에 완주했습니다. 지난주보다 3초 빨라졌어요!",
-    date: "2024-01-15",
-    author: {
-      name: "김수영",
-      avatar: "https://via.placeholder.com/40",
-    },
-    likes: 12,
-    comments: 5,
-  },
-  {
-    id: "2",
-    distance: 200,
-    time: "03:30",
-    stroke: "backstroke",
-    description: "배영 200m 훈련. 어깨 회전이 부드러워졌습니다.",
-    date: "2024-01-14",
-    author: {
-      name: "박영수",
-      avatar: "https://via.placeholder.com/40",
-    },
-    likes: 8,
-    comments: 3,
-  },
-  {
-    id: "3",
-    distance: 50,
-    time: "00:45",
-    stroke: "butterfly",
-    description: "접영 50m 스프린트. 팔 동작에 집중했습니다.",
-    date: "2024-01-13",
-    author: {
-      name: "이영희",
-      avatar: "https://via.placeholder.com/40",
-    },
-    likes: 15,
-    comments: 7,
-  },
-];
+interface SwimmingRecord {
+  id: number;
+  title: string;
+  description?: string;
+  duration: number;
+  distance: number;
+  style: string;
+  sessionDate?: string;
+  createdAt: string;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
 
 export default function RecordsPage() {
+  const { user } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [records, setRecords] = useState(mockRecords);
+  const [records, setRecords] = useState<SwimmingRecord[]>([]);
   const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmitRecord = (record: any) => {
-    const newRecord = {
-      id: Date.now().toString(),
-      ...record,
-      author: {
-        name: "나",
-        avatar: "https://via.placeholder.com/40",
-      },
-      likes: 0,
-      comments: 0,
-    };
-    setRecords([newRecord, ...records]);
-    setIsFormOpen(false);
+  // 수영 기록 목록 가져오기
+  const fetchRecords = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await swimmingAPI.getRecords();
+      setRecords(response.data);
+    } catch (err: any) {
+      console.error("Failed to fetch records:", err);
+      setError("수영 기록을 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecords();
+  }, []);
+
+  const handleSubmitRecord = async (recordData: any) => {
+    try {
+      setSubmitting(true);
+      const response = await swimmingAPI.createRecord(recordData);
+      setRecords([response.data, ...records]);
+      setIsFormOpen(false);
+    } catch (err: any) {
+      console.error("Failed to create record:", err);
+      alert("수영 기록 등록에 실패했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleLike = (id: string) => {
@@ -86,10 +80,36 @@ export default function RecordsPage() {
     console.log("Share record:", id);
   };
 
+  // 분을 MM:SS 형식으로 변환
+  const formatDuration = (duration: number): string => {
+    const minutes = Math.floor(duration);
+    const seconds = Math.round((duration - minutes) * 60);
+    return `${minutes}:${String(seconds).padStart(2, '0')}`;
+  };
+
   const filteredRecords = records.filter((record) => {
     if (filter === "all") return true;
-    return record.stroke === filter;
+    return record.style === filter;
   });
+
+  // 영법 한글명 매핑
+  const styleLabels: { [key: string]: string } = {
+    freestyle: "자유형",
+    backstroke: "배영",
+    breaststroke: "평영",
+    butterfly: "접영",
+    medley: "개인혼영",
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className={styles.container}>
+          <div className={styles.loading}>수영 기록을 불러오는 중...</div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -104,6 +124,20 @@ export default function RecordsPage() {
             기록 올리기
           </Button>
         </div>
+
+        {error && (
+          <div className={styles.error}>
+            {error}
+            <Button
+              variant="outline"
+              size="small"
+              onClick={fetchRecords}
+              className={styles.retryButton}
+            >
+              다시 시도
+            </Button>
+          </div>
+        )}
 
         <div className={styles.filters}>
           <button
@@ -139,15 +173,34 @@ export default function RecordsPage() {
         </div>
 
         <div className={styles.recordsList}>
-          {filteredRecords.map((record) => (
-            <RecordCard
-              key={record.id}
-              record={record}
-              onLike={handleLike}
-              onComment={handleComment}
-              onShare={handleShare}
-            />
-          ))}
+          {filteredRecords.length === 0 ? (
+            <div className={styles.emptyState}>
+              {filter === "all" ? "아직 수영 기록이 없습니다." : `${styleLabels[filter]} 기록이 없습니다.`}
+            </div>
+          ) : (
+            filteredRecords.map((record) => (
+              <RecordCard
+                key={record.id}
+                record={{
+                  id: record.id.toString(),
+                  distance: record.distance,
+                  time: formatDuration(record.duration),
+                  stroke: record.style,
+                  description: record.description || "",
+                  date: record.sessionDate || record.createdAt.split('T')[0],
+                  author: {
+                    name: record.user?.name || "알 수 없음",
+                    avatar: "https://via.placeholder.com/40",
+                  },
+                  likes: 0,
+                  comments: 0,
+                }}
+                onLike={handleLike}
+                onComment={handleComment}
+                onShare={handleShare}
+              />
+            ))
+          )}
         </div>
 
         <Modal
@@ -160,6 +213,11 @@ export default function RecordsPage() {
             onSubmit={handleSubmitRecord}
             onCancel={() => setIsFormOpen(false)}
           />
+          {submitting && (
+            <div className={styles.submitting}>
+              기록을 등록하는 중...
+            </div>
+          )}
         </Modal>
       </div>
     </Layout>
