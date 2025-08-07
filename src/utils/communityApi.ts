@@ -105,6 +105,42 @@ export const createComment = async (
   }
 };
 
+export const likeComment = async (commentId: number): Promise<Comment> => {
+  try {
+    const token = localStorage.getItem("access_token");
+    const response = await fetch(`${API_BASE_URL}/comments/${commentId}/like`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error("댓글 좋아요 처리에 실패했습니다.");
+
+    return await response.json();
+  } catch (error) {
+    console.error("likeComment error:", error);
+    throw error;
+  }
+};
+
+export const deleteComment = async (commentId: number): Promise<void> => {
+  try {
+    const token = localStorage.getItem("access_token");
+    const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error("댓글 삭제에 실패했습니다.");
+  } catch (error) {
+    console.error("deleteComment error:", error);
+    throw error;
+  }
+};
+
 // 커뮤니티 통계 API
 export const getCommunityStats = async (): Promise<CommunityStats> => {
   try {

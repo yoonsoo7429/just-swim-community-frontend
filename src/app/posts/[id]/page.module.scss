@@ -158,38 +158,17 @@
 .commentsList {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.comment {
-  padding: 16px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background-color: #f9fafb;
-}
-
-.commentHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.commentAuthor {
-  font-weight: 600;
-  color: #374151;
-  font-size: 0.875rem;
-}
-
-.commentTime {
+.emptyComments {
+  text-align: center;
+  padding: 40px 20px;
   color: #6b7280;
-  font-size: 0.75rem;
-}
-
-.commentContent {
-  color: #374151;
-  line-height: 1.6;
-  margin: 0;
+  font-size: 0.875rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
 }
 
 // Loading and error styles

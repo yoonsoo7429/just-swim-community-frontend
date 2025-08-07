@@ -13,15 +13,15 @@ import {
   likePost,
 } from "../utils/communityApi";
 import { useAuth } from "../contexts/AuthContext";
+import { useLikedPosts } from "../hooks/useLikedPosts";
 import styles from "./page.module.scss";
 
 export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
+  const { isLiked, setLiked } = useLikedPosts();
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [popularPosts, setPopularPosts] = useState<Post[]>([]);
-  console.log("Recent Posts:", recentPosts);
-  console.log("Popular Posts:", popularPosts);
   const [communityStats, setCommunityStats] = useState<CommunityStats>({
     totalMembers: 0,
     todayPosts: 0,
@@ -245,6 +245,7 @@ export default function Home() {
                               }
                               try {
                                 const updatedPost = await likePost(post.id);
+                                setLiked(post.id, updatedPost.isLiked || false);
                                 handleLikeUpdate(updatedPost);
                               } catch (error) {
                                 console.error("좋아요 처리 실패:", error);
@@ -253,7 +254,7 @@ export default function Home() {
                             }}
                             style={{ cursor: user ? "pointer" : "default" }}
                           >
-                            {post.isLiked ? "❤️" : "🤍"} {post.likes}
+                            {isLiked(post.id) ? "❤️" : "🤍"} {post.likes}
                           </span>
                           <span className={styles.comments}>
                             💬 {post.comments}

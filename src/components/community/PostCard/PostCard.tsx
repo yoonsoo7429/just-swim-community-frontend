@@ -2,6 +2,7 @@ import React from "react";
 import { Post } from "../../../types";
 import { likePost } from "../../../utils/communityApi";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useLikedPosts } from "../../../hooks/useLikedPosts";
 import styles from "./styles.module.scss";
 
 interface PostCardProps {
@@ -16,6 +17,7 @@ export default function PostCard({
   onLikeUpdate,
 }: PostCardProps) {
   const { user } = useAuth();
+  const { isLiked, setLiked } = useLikedPosts();
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -43,6 +45,10 @@ export default function PostCard({
 
     try {
       const updatedPost = await likePost(post.id);
+      
+      // 로컬 상태 업데이트
+      setLiked(post.id, updatedPost.isLiked);
+      
       if (onLikeUpdate) {
         onLikeUpdate(updatedPost);
       }
@@ -67,7 +73,7 @@ export default function PostCard({
             onClick={handleLikeClick}
             style={{ cursor: user ? "pointer" : "default" }}
           >
-            {post.isLiked ? "❤️" : "🤍"} {post.likes}
+            {isLiked(post.id) ? "❤️" : "🤍"} {post.likes}
           </span>
           <span className={styles.comments}>💬 {post.comments}</span>
         </div>

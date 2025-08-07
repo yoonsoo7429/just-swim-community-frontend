@@ -10,18 +10,18 @@ import {
   createComment,
   likePost,
 } from "../../../utils/communityApi";
+import { useLikedPosts } from "../../../hooks/useLikedPosts";
+import { CommentItem, CommentForm } from "../../../components/community";
 import styles from "./page.module.scss";
 
 export default function PostDetail() {
   const params = useParams();
   const postId = Number(params.id);
+  const { isLiked, setLiked } = useLikedPosts();
 
   const [post, setPost] = useState<Post | null>(null);
-  console.error("Post ID:", post);
   const [comments, setComments] = useState<Comment[]>([]);
-  const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (postId) {
@@ -49,13 +49,14 @@ export default function PostDetail() {
     if (!post) return;
 
     try {
-      await likePost(post.id);
+      const updatedPost = await likePost(post.id);
+      setLiked(post.id, updatedPost.isLiked || false);
       setPost((prev) =>
         prev
           ? {
               ...prev,
-              likes: prev.isLiked ? prev.likes - 1 : prev.likes + 1,
-              isLiked: !prev.isLiked,
+              likes: updatedPost.likes,
+              isLiked: updatedPost.isLiked,
             }
           : null
       );
@@ -64,22 +65,26 @@ export default function PostDetail() {
     }
   };
 
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!newComment.trim()) return;
-
+  const handleCommentSubmit = async (content: string) => {
     try {
-      setIsSubmitting(true);
-      const comment = await createComment(postId, newComment.trim());
+      const comment = await createComment(postId, content);
       setComments((prev) => [...prev, comment]);
-      setNewComment("");
     } catch (error) {
       console.error("댓글 작성 실패:", error);
       alert("댓글 작성에 실패했습니다.");
-    } finally {
-      setIsSubmitting(false);
     }
+  };
+
+  const handleCommentUpdate = (updatedComment: Comment) => {
+    setComments((prev) =>
+      prev.map((comment) =>
+        comment.id === updatedComment.id ? updatedComment : comment
+      )
+    );
+  };
+
+  const handleCommentDelete = (commentId: number) => {
+    setComments((prev) => prev.filter((comment) => comment.id !== commentId));
   };
 
   const formatTime = (dateString: string) => {
@@ -148,11 +153,11 @@ export default function PostDetail() {
           <div className={styles.actions}>
             <button
               className={`${styles.likeButton} ${
-                post.isLiked ? styles.liked : ""
+                isLiked(post.id) ? styles.liked : ""
               }`}
               onClick={handleLike}
             >
-              {post.isLiked ? "❤️" : "🤍"} {post.likes}
+              {isLiked(post.id) ? "❤️" : "🤍"} {post.likes}
             </button>
             <span className={styles.commentCount}>💬 {comments.length}</span>
           </div>
@@ -162,39 +167,24 @@ export default function PostDetail() {
             <h3>댓글 ({comments.length})</h3>
 
             {/* 댓글 작성 폼 */}
-            <form onSubmit={handleCommentSubmit} className={styles.commentForm}>
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="댓글을 입력하세요..."
-                className={styles.commentInput}
-                rows={3}
-                disabled={isSubmitting}
-              />
-              <button
-                type="submit"
-                className={styles.submitButton}
-                disabled={isSubmitting || !newComment.trim()}
-              >
-                {isSubmitting ? "작성 중..." : "댓글 작성"}
-              </button>
-            </form>
+            <CommentForm onSubmit={handleCommentSubmit} />
 
             {/* 댓글 목록 */}
             <div className={styles.commentsList}>
-              {comments.map((comment) => (
-                <div key={comment.id} className={styles.comment}>
-                  <div className={styles.commentHeader}>
-                    <span className={styles.commentAuthor}>
-                      {comment.author.name}
-                    </span>
-                    <span className={styles.commentTime}>
-                      {formatTime(comment.createdAt)}
-                    </span>
-                  </div>
-                  <p className={styles.commentContent}>{comment.content}</p>
+              {comments.length > 0 ? (
+                comments.map((comment) => (
+                  <CommentItem
+                    key={comment.id}
+                    comment={comment}
+                    onCommentUpdate={handleCommentUpdate}
+                    onDelete={handleCommentDelete}
+                  />
+                ))
+              ) : (
+                <div className={styles.emptyComments}>
+                  <p>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
