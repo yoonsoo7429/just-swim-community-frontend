@@ -8,23 +8,8 @@ import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 import { swimmingAPI } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { SwimmingRecord } from "../../types";
 import styles from "./page.module.scss";
-
-interface SwimmingRecord {
-  id: number;
-  title: string;
-  description?: string;
-  duration: number;
-  distance: number;
-  style: string;
-  sessionDate?: string;
-  createdAt: string;
-  user?: {
-    id: number;
-    name: string;
-    email: string;
-  };
-}
 
 export default function RecordsPage() {
   const { user } = useAuth();
@@ -80,16 +65,9 @@ export default function RecordsPage() {
     console.log("Share record:", id);
   };
 
-  // 분을 MM:SS 형식으로 변환
-  const formatDuration = (duration: number): string => {
-    const minutes = Math.floor(duration);
-    const seconds = Math.round((duration - minutes) * 60);
-    return `${minutes}:${String(seconds).padStart(2, '0')}`;
-  };
-
   const filteredRecords = records.filter((record) => {
     if (filter === "all") return true;
-    return record.style === filter;
+    return record.strokes?.some((stroke) => stroke.style === filter);
   });
 
   // 영법 한글명 매핑
@@ -141,31 +119,41 @@ export default function RecordsPage() {
 
         <div className={styles.filters}>
           <button
-            className={`${styles.filterButton} ${filter === "all" ? styles.active : ""}`}
+            className={`${styles.filterButton} ${
+              filter === "all" ? styles.active : ""
+            }`}
             onClick={() => setFilter("all")}
           >
             전체
           </button>
           <button
-            className={`${styles.filterButton} ${filter === "freestyle" ? styles.active : ""}`}
+            className={`${styles.filterButton} ${
+              filter === "freestyle" ? styles.active : ""
+            }`}
             onClick={() => setFilter("freestyle")}
           >
             자유형
           </button>
           <button
-            className={`${styles.filterButton} ${filter === "backstroke" ? styles.active : ""}`}
+            className={`${styles.filterButton} ${
+              filter === "backstroke" ? styles.active : ""
+            }`}
             onClick={() => setFilter("backstroke")}
           >
             배영
           </button>
           <button
-            className={`${styles.filterButton} ${filter === "breaststroke" ? styles.active : ""}`}
+            className={`${styles.filterButton} ${
+              filter === "breaststroke" ? styles.active : ""
+            }`}
             onClick={() => setFilter("breaststroke")}
           >
             평영
           </button>
           <button
-            className={`${styles.filterButton} ${filter === "butterfly" ? styles.active : ""}`}
+            className={`${styles.filterButton} ${
+              filter === "butterfly" ? styles.active : ""
+            }`}
             onClick={() => setFilter("butterfly")}
           >
             접영
@@ -175,26 +163,15 @@ export default function RecordsPage() {
         <div className={styles.recordsList}>
           {filteredRecords.length === 0 ? (
             <div className={styles.emptyState}>
-              {filter === "all" ? "아직 수영 기록이 없습니다." : `${styleLabels[filter]} 기록이 없습니다.`}
+              {filter === "all"
+                ? "아직 수영 기록이 없습니다."
+                : `${styleLabels[filter]} 기록이 없습니다.`}
             </div>
           ) : (
             filteredRecords.map((record) => (
               <RecordCard
                 key={record.id}
-                record={{
-                  id: record.id.toString(),
-                  distance: record.distance,
-                  time: formatDuration(record.duration),
-                  stroke: record.style,
-                  description: record.description || "",
-                  date: record.sessionDate || record.createdAt.split('T')[0],
-                  author: {
-                    name: record.user?.name || "알 수 없음",
-                    avatar: "https://via.placeholder.com/40",
-                  },
-                  likes: 0,
-                  comments: 0,
-                }}
+                record={record}
                 onLike={handleLike}
                 onComment={handleComment}
                 onShare={handleShare}
@@ -214,12 +191,10 @@ export default function RecordsPage() {
             onCancel={() => setIsFormOpen(false)}
           />
           {submitting && (
-            <div className={styles.submitting}>
-              기록을 등록하는 중...
-            </div>
+            <div className={styles.submitting}>기록을 등록하는 중...</div>
           )}
         </Modal>
       </div>
     </Layout>
   );
-} 
+}

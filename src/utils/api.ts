@@ -62,6 +62,23 @@ export const swimmingAPI = {
   // 수영 기록 목록
   getRecords: () => apiClient.get("/swimming"),
 
+  // 내 수영 기록 목록
+  getMyRecords: () => apiClient.get("/swimming/my-records"),
+
+  // 최근 수영 기록
+  getRecentRecords: (limit?: number) =>
+    apiClient.get(`/swimming/recent${limit ? `?limit=${limit}` : ""}`),
+
+  // 영법별 수영 기록
+  getRecordsByStyle: (style: string) =>
+    apiClient.get(`/swimming/style/${style}`),
+
+  // 수영 통계
+  getStats: () => apiClient.get("/swimming/stats"),
+
+  // 내 수영 통계
+  getMyStats: () => apiClient.get("/swimming/my-stats"),
+
   // 수영 기록 생성
   createRecord: (data: any) => apiClient.post("/swimming", data),
 

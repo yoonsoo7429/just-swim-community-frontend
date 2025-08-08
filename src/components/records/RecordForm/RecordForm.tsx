@@ -4,14 +4,19 @@ import React, { useState } from "react";
 import styles from "./styles.module.scss";
 import Button from "../../ui/Button";
 import Input from "../../ui/Input";
+import { StrokeRecord } from "../../../types";
 
 interface RecordFormProps {
   onSubmit?: (record: {
     title: string;
     description?: string;
-    duration: number; // 분 단위
-    distance: number; // 미터 단위
-    style: string;
+    poolLength: number;
+    sessionStartTime: string;
+    sessionEndTime: string;
+    strokes: StrokeRecord[];
+    totalDistance: number;
+    totalDuration: number;
+    calories?: number;
     sessionDate?: string;
   }) => void;
   onCancel?: () => void;
@@ -19,41 +24,88 @@ interface RecordFormProps {
 
 const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
   const [title, setTitle] = useState("");
-  const [distance, setDistance] = useState("");
-  const [time, setTime] = useState("");
-  const [style, setStyle] = useState("freestyle");
   const [description, setDescription] = useState("");
-  const [sessionDate, setSessionDate] = useState(new Date().toISOString().split("T")[0]);
+  const [poolLength, setPoolLength] = useState("25");
+  const [sessionStartTime, setSessionStartTime] = useState("");
+  const [sessionEndTime, setSessionEndTime] = useState("");
+  const [strokes, setStrokes] = useState<StrokeRecord[]>([
+    { style: "freestyle", distance: 0 },
+  ]);
+  const [calories, setCalories] = useState("");
+  const [sessionDate, setSessionDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [errors, setErrors] = useState<{
     title?: string;
-    distance?: string;
-    time?: string;
-    style?: string;
+    poolLength?: string;
+    sessionStartTime?: string;
+    sessionEndTime?: string;
+    strokes?: string;
   }>({});
 
-  // MM:SS 형식을 분 단위로 변환
+  // 시간을 분 단위로 변환
   const convertTimeToMinutes = (timeString: string): number => {
-    const [minutes, seconds] = timeString.split(":").map(Number);
-    return minutes + seconds / 60;
+    const [hours, minutes] = timeString.split(":").map(Number);
+    return hours * 60 + minutes;
   };
 
+  // 총 거리 계산
+  const totalDistance = strokes.reduce(
+    (sum, stroke) => sum + stroke.distance,
+    0
+  );
+
+  // 총 시간 계산
+  const totalDuration =
+    sessionStartTime && sessionEndTime
+      ? convertTimeToMinutes(sessionEndTime) -
+        convertTimeToMinutes(sessionStartTime)
+      : 0;
+
   const validateForm = () => {
-    const newErrors: { title?: string; distance?: string; time?: string; style?: string } = {};
+    const newErrors: {
+      title?: string;
+      poolLength?: string;
+      sessionStartTime?: string;
+      sessionEndTime?: string;
+      strokes?: string;
+    } = {};
 
     if (!title.trim()) {
       newErrors.title = "제목을 입력해주세요.";
     }
 
-    if (!distance) {
-      newErrors.distance = "거리를 입력해주세요.";
-    } else if (isNaN(Number(distance)) || Number(distance) <= 0) {
-      newErrors.distance = "올바른 거리를 입력해주세요.";
+    if (
+      !poolLength ||
+      isNaN(Number(poolLength)) ||
+      Number(poolLength) < 25 ||
+      Number(poolLength) > 100
+    ) {
+      newErrors.poolLength = "올바른 수영장 길이를 입력해주세요 (25-100m).";
     }
 
-    if (!time) {
-      newErrors.time = "시간을 입력해주세요.";
-    } else if (!/^\d{1,2}:\d{2}$/.test(time)) {
-      newErrors.time = "시간 형식을 MM:SS로 입력해주세요.";
+    if (!sessionStartTime) {
+      newErrors.sessionStartTime = "시작 시간을 입력해주세요.";
+    }
+
+    if (!sessionEndTime) {
+      newErrors.sessionEndTime = "종료 시간을 입력해주세요.";
+    }
+
+    if (
+      sessionStartTime &&
+      sessionEndTime &&
+      convertTimeToMinutes(sessionEndTime) <=
+        convertTimeToMinutes(sessionStartTime)
+    ) {
+      newErrors.sessionEndTime = "종료 시간은 시작 시간보다 늦어야 합니다.";
+    }
+
+    if (
+      strokes.length === 0 ||
+      strokes.every((stroke) => stroke.distance === 0)
+    ) {
+      newErrors.strokes = "최소 하나의 영법과 거리를 입력해주세요.";
     }
 
     setErrors(newErrors);
@@ -64,18 +116,48 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
     e.preventDefault();
 
     if (validateForm()) {
-      const durationInMinutes = convertTimeToMinutes(time);
-      
       onSubmit?.({
         title: title.trim(),
         description: description.trim() || undefined,
-        duration: Math.round(durationInMinutes * 100) / 100, // 소수점 2자리까지
-        distance: Number(distance),
-        style,
+        poolLength: Number(poolLength),
+        sessionStartTime,
+        sessionEndTime,
+        strokes: strokes.filter((stroke) => stroke.distance > 0),
+        totalDistance,
+        totalDuration: Math.max(0, totalDuration),
+        calories: calories ? Number(calories) : undefined,
         sessionDate: sessionDate || undefined,
       });
     }
   };
+
+  const addStroke = () => {
+    setStrokes([...strokes, { style: "freestyle", distance: 0 }]);
+  };
+
+  const removeStroke = (index: number) => {
+    if (strokes.length > 1) {
+      setStrokes(strokes.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateStroke = (
+    index: number,
+    field: keyof StrokeRecord,
+    value: string | number
+  ) => {
+    const newStrokes = [...strokes];
+    newStrokes[index] = { ...newStrokes[index], [field]: value };
+    setStrokes(newStrokes);
+  };
+
+  const styleOptions = [
+    { value: "freestyle", label: "자유형" },
+    { value: "backstroke", label: "배영" },
+    { value: "breaststroke", label: "평영" },
+    { value: "butterfly", label: "접영" },
+    { value: "medley", label: "개인혼영" },
+  ];
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
@@ -94,38 +176,39 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
 
         <Input
           type="number"
-          label="거리 (미터)"
-          placeholder="예: 100"
-          value={distance}
-          onChange={(e) => setDistance(e.target.value)}
-          error={errors.distance}
+          label="수영장 길이 (미터)"
+          placeholder="예: 25"
+          value={poolLength}
+          onChange={(e) => setPoolLength(e.target.value)}
+          error={errors.poolLength}
           required
         />
 
         <Input
-          type="text"
-          label="시간 (MM:SS)"
-          placeholder="예: 02:30"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          error={errors.time}
+          type="time"
+          label="시작 시간"
+          value={sessionStartTime}
+          onChange={(e) => setSessionStartTime(e.target.value)}
+          error={errors.sessionStartTime}
           required
         />
 
-        <div className={styles.selectWrapper}>
-          <label className={styles.label}>영법</label>
-          <select
-            value={style}
-            onChange={(e) => setStyle(e.target.value)}
-            className={styles.select}
-          >
-            <option value="freestyle">자유형</option>
-            <option value="backstroke">배영</option>
-            <option value="breaststroke">평영</option>
-            <option value="butterfly">접영</option>
-            <option value="medley">개인혼영</option>
-          </select>
-        </div>
+        <Input
+          type="time"
+          label="종료 시간"
+          value={sessionEndTime}
+          onChange={(e) => setSessionEndTime(e.target.value)}
+          error={errors.sessionEndTime}
+          required
+        />
+
+        <Input
+          type="number"
+          label="칼로리 (선택사항)"
+          placeholder="예: 300"
+          value={calories}
+          onChange={(e) => setCalories(e.target.value)}
+        />
 
         <Input
           type="date"
@@ -134,6 +217,84 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
           onChange={(e) => setSessionDate(e.target.value)}
           required
         />
+      </div>
+
+      <div className={styles.strokesSection}>
+        <div className={styles.sectionHeader}>
+          <h3>영법별 거리</h3>
+          <Button
+            type="button"
+            variant="outline"
+            size="small"
+            onClick={addStroke}
+          >
+            영법 추가
+          </Button>
+        </div>
+
+        {errors.strokes && <div className={styles.error}>{errors.strokes}</div>}
+
+        {strokes.map((stroke, index) => (
+          <div key={index} className={styles.strokeRow}>
+            <div className={styles.strokeSelect}>
+              <label>영법</label>
+              <select
+                value={stroke.style}
+                onChange={(e) => updateStroke(index, "style", e.target.value)}
+                className={styles.select}
+              >
+                {styleOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.strokeDistance}>
+              <label>거리 (미터)</label>
+              <input
+                type="number"
+                value={stroke.distance}
+                onChange={(e) =>
+                  updateStroke(index, "distance", Number(e.target.value))
+                }
+                placeholder="0"
+                min="0"
+                className={styles.input}
+              />
+            </div>
+
+            {strokes.length > 1 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="small"
+                onClick={() => removeStroke(index)}
+                className={styles.removeButton}
+              >
+                삭제
+              </Button>
+            )}
+          </div>
+        ))}
+
+        <div className={styles.summary}>
+          <div className={styles.summaryItem}>
+            <span>총 거리:</span>
+            <span>{totalDistance}m</span>
+          </div>
+          <div className={styles.summaryItem}>
+            <span>총 시간:</span>
+            <span>
+              {totalDuration > 0
+                ? `${Math.floor(totalDuration / 60)}:${String(
+                    totalDuration % 60
+                  ).padStart(2, "0")}`
+                : "0:00"}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className={styles.textareaWrapper}>
@@ -171,4 +332,4 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
   );
 };
 
-export default RecordForm; 
+export default RecordForm;

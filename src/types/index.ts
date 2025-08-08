@@ -54,14 +54,37 @@ export interface CommunityStats {
 
 export interface SwimmingRecord {
   id: number;
-  userId: number;
-  distance: number; // meters
-  time: number; // seconds
-  stroke: "freestyle" | "backstroke" | "breaststroke" | "butterfly" | "medley";
-  date: string;
-  notes?: string;
+  title: string;
+  description?: string;
+  poolLength: number; // 수영장 길이 (미터)
+  sessionStartTime: string; // HH:MM 형식
+  sessionEndTime: string; // HH:MM 형식
+  strokes: StrokeRecord[]; // 여러 영법과 거리
+  totalDistance: number; // 총 거리 (미터)
+  totalDuration: number; // 총 시간 (분)
+  calories?: number;
+  sessionDate?: string;
+  visibility: string; // public, private, friends
+  user?: User;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface StrokeRecord {
+  style: string;
+  distance: number;
+}
+
+export interface SwimmingStats {
+  totalDistance: number;
+  totalDuration: number;
+  totalSessions: number;
+  averageDistance: number;
+  averageDuration: number;
+  favoriteStyle: string;
+  styleBreakdown: {
+    [key: string]: number;
+  };
 }
 
 export interface TrainingProgram {

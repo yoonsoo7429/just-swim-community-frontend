@@ -3,22 +3,10 @@
 import React, { useState } from "react";
 import styles from "./styles.module.scss";
 import Button from "../../ui/Button";
+import { SwimmingRecord } from "../../../types";
 
 interface RecordCardProps {
-  record: {
-    id: string;
-    distance: number;
-    time: string;
-    stroke: string;
-    description: string;
-    date: string;
-    author: {
-      name: string;
-      avatar?: string;
-    };
-    likes: number;
-    comments: number;
-  };
+  record: SwimmingRecord;
   onLike?: (id: string) => void;
   onComment?: (id: string) => void;
   onShare?: (id: string) => void;
@@ -52,51 +40,87 @@ const RecordCard: React.FC<RecordCardProps> = ({
     });
   };
 
+  const formatDuration = (duration: number): string => {
+    const hours = Math.floor(duration / 60);
+    const minutes = duration % 60;
+    if (hours > 0) {
+      return `${hours}:${String(minutes).padStart(2, "0")}`;
+    }
+    return `${minutes}:00`;
+  };
+
   const handleLike = () => {
     setIsLiked(!isLiked);
-    onLike?.(record.id);
+    onLike?.(record.id.toString());
   };
 
   return (
     <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.author}>
-          {record.author.avatar && (
+          {record.user?.profileImage && (
             <img
-              src={record.author.avatar}
-              alt={record.author.name}
+              src={record.user.profileImage}
+              alt={record.user.name}
               className={styles.avatar}
             />
           )}
           <div className={styles.authorInfo}>
-            <h3 className={styles.authorName}>{record.author.name}</h3>
-            <span className={styles.date}>{formatDate(record.date)}</span>
+            <h3 className={styles.authorName}>
+              {record.user?.name || "알 수 없음"}
+            </h3>
+            <span className={styles.date}>
+              {formatDate(record.sessionDate || record.createdAt)}
+            </span>
           </div>
         </div>
-        <div className={styles.stroke}>
-          <span className={styles.strokeBadge}>
-            {getStrokeName(record.stroke)}
-          </span>
+        <div className={styles.title}>
+          <h4>{record.title}</h4>
         </div>
       </div>
 
       <div className={styles.record}>
         <div className={styles.recordInfo}>
           <div className={styles.distance}>
-            <span className={styles.value}>{record.distance}m</span>
-            <span className={styles.label}>거리</span>
+            <span className={styles.value}>{record.totalDistance}m</span>
+            <span className={styles.label}>총 거리</span>
           </div>
           <div className={styles.time}>
-            <span className={styles.value}>{record.time}</span>
-            <span className={styles.label}>시간</span>
-          </div>
-          <div className={styles.pace}>
             <span className={styles.value}>
-              {calculatePace(record.distance, record.time)}
+              {formatDuration(record.totalDuration)}
             </span>
-            <span className={styles.label}>페이스</span>
+            <span className={styles.label}>총 시간</span>
+          </div>
+          <div className={styles.poolLength}>
+            <span className={styles.value}>{record.poolLength}m</span>
+            <span className={styles.label}>수영장</span>
           </div>
         </div>
+
+        {record.strokes && record.strokes.length > 0 && (
+          <div className={styles.strokes}>
+            <h5>영법별 거리</h5>
+            <div className={styles.strokeList}>
+              {record.strokes.map((stroke, index) => (
+                <div key={index} className={styles.strokeItem}>
+                  <span className={styles.strokeName}>
+                    {getStrokeName(stroke.style)}
+                  </span>
+                  <span className={styles.strokeDistance}>
+                    {stroke.distance}m
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {record.calories && (
+          <div className={styles.calories}>
+            <span className={styles.value}>{record.calories} kcal</span>
+            <span className={styles.label}>소모 칼로리</span>
+          </div>
+        )}
       </div>
 
       {record.description && (
@@ -119,12 +143,12 @@ const RecordCard: React.FC<RecordCardProps> = ({
               strokeLinejoin="round"
             />
           </svg>
-          <span>{record.likes + (isLiked ? 1 : 0)}</span>
+          <span>좋아요</span>
         </button>
 
         <button
           className={styles.actionButton}
-          onClick={() => onComment?.(record.id)}
+          onClick={() => onComment?.(record.id.toString())}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path
@@ -135,12 +159,12 @@ const RecordCard: React.FC<RecordCardProps> = ({
               strokeLinejoin="round"
             />
           </svg>
-          <span>{record.comments}</span>
+          <span>댓글</span>
         </button>
 
         <button
           className={styles.actionButton}
-          onClick={() => onShare?.(record.id)}
+          onClick={() => onShare?.(record.id.toString())}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path
@@ -158,14 +182,4 @@ const RecordCard: React.FC<RecordCardProps> = ({
   );
 };
 
-// 페이스 계산 함수 (100m당 시간)
-const calculatePace = (distance: number, time: string): string => {
-  const [minutes, seconds] = time.split(":").map(Number);
-  const totalSeconds = minutes * 60 + seconds;
-  const paceSeconds = (totalSeconds / distance) * 100;
-  const paceMinutes = Math.floor(paceSeconds / 60);
-  const paceRemainingSeconds = Math.floor(paceSeconds % 60);
-  return `${paceMinutes}:${paceRemainingSeconds.toString().padStart(2, "0")}`;
-};
-
-export default RecordCard; 
+export default RecordCard;

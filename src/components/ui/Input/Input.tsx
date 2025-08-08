@@ -1,8 +1,16 @@
-import React from 'react';
-import styles from './styles.module.scss';
+import React from "react";
+import styles from "./styles.module.scss";
 
 interface InputProps {
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+  type?:
+    | "text"
+    | "email"
+    | "password"
+    | "number"
+    | "tel"
+    | "url"
+    | "time"
+    | "date";
   placeholder?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -15,11 +23,11 @@ interface InputProps {
   className?: string;
   error?: string;
   label?: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
 }
 
 const Input: React.FC<InputProps> = ({
-  type = 'text',
+  type = "text",
   placeholder,
   value,
   onChange,
@@ -29,10 +37,10 @@ const Input: React.FC<InputProps> = ({
   required = false,
   name,
   id,
-  className = '',
+  className = "",
   error,
   label,
-  size = 'medium',
+  size = "medium",
 }) => {
   return (
     <div className={`${styles.inputWrapper} ${className}`}>
@@ -53,11 +61,13 @@ const Input: React.FC<InputProps> = ({
         required={required}
         name={name}
         id={id}
-        className={`${styles.input} ${styles[size]} ${error ? styles.error : ''}`}
+        className={`${styles.input} ${styles[size]} ${
+          error ? styles.error : ""
+        }`}
       />
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
   );
 };
 
-export default Input; 
+export default Input;
