@@ -39,7 +39,18 @@ export default function RecordsPage() {
     fetchRecords();
   }, []);
 
-  const handleSubmitRecord = async (recordData: any) => {
+  const handleSubmitRecord = async (recordData: {
+    title: string;
+    description?: string;
+    poolLength: 25 | 50;
+    sessionStartTime: string;
+    sessionEndTime: string;
+    strokes: { style: string; distance: string }[];
+    totalDistance: number;
+    totalDuration: number;
+    calories?: number;
+    sessionDate?: string;
+  }) => {
     try {
       setSubmitting(true);
       const response = await swimmingAPI.createRecord(recordData);
@@ -53,12 +64,59 @@ export default function RecordsPage() {
     }
   };
 
-  const handleLike = (id: string) => {
-    console.log("Like record:", id);
+  const handleLike = async (id: string) => {
+    try {
+      const record = records.find((r) => r.id.toString() === id);
+      if (!record) return;
+
+      if (record.isLiked) {
+        await swimmingAPI.removeLike(id);
+        // 좋아요 제거 후 상태 업데이트
+        setRecords(
+          records.map((r) =>
+            r.id.toString() === id
+              ? {
+                  ...r,
+                  isLiked: false,
+                  likesCount: Math.max(0, r.likesCount - 1),
+                }
+              : r
+          )
+        );
+      } else {
+        await swimmingAPI.addLike(id);
+        // 좋아요 추가 후 상태 업데이트
+        setRecords(
+          records.map((r) =>
+            r.id.toString() === id
+              ? { ...r, isLiked: true, likesCount: r.likesCount + 1 }
+              : r
+          )
+        );
+      }
+    } catch (err: any) {
+      console.error("Failed to toggle like:", err);
+      alert("좋아요 처리에 실패했습니다.");
+    }
   };
 
-  const handleComment = (id: string) => {
-    console.log("Comment on record:", id);
+  const handleComment = async (id: string, content: string) => {
+    try {
+      const response = await swimmingAPI.addComment(id, content);
+      // 댓글 추가 후 댓글 수 증가
+      setRecords(
+        records.map((r) =>
+          r.id.toString() === id
+            ? { ...r, commentsCount: r.commentsCount + 1 }
+            : r
+        )
+      );
+      return response.data;
+    } catch (err: any) {
+      console.error("Failed to add comment:", err);
+      alert("댓글 등록에 실패했습니다.");
+      throw err;
+    }
   };
 
   const handleShare = (id: string) => {

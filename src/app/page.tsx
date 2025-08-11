@@ -65,7 +65,7 @@ export default function Home() {
   }) => {
     try {
       const newPost = await createPost(data);
-      setRecentPosts((prev) => [newPost, ...prev.slice(0, 3)]); // 새 게시물을 맨 앞에 추가
+      setRecentPosts((prev) => [newPost, ...prev.slice(0, 3)]);
       alert("게시물이 성공적으로 작성되었습니다!");
     } catch (error) {
       console.error("게시물 작성 실패:", error);

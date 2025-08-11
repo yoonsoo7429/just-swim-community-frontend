@@ -10,7 +10,7 @@ interface RecordFormProps {
   onSubmit?: (record: {
     title: string;
     description?: string;
-    poolLength: number;
+    poolLength: 25 | 50;
     sessionStartTime: string;
     sessionEndTime: string;
     strokes: StrokeRecord[];
@@ -25,11 +25,11 @@ interface RecordFormProps {
 const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [poolLength, setPoolLength] = useState("25");
+  const [poolLength, setPoolLength] = useState<25 | 50>(25);
   const [sessionStartTime, setSessionStartTime] = useState("");
   const [sessionEndTime, setSessionEndTime] = useState("");
   const [strokes, setStrokes] = useState<StrokeRecord[]>([
-    { style: "freestyle", distance: 0 },
+    { style: "freestyle", distance: "" },
   ]);
   const [calories, setCalories] = useState("");
   const [sessionDate, setSessionDate] = useState(
@@ -51,7 +51,7 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
 
   // 총 거리 계산
   const totalDistance = strokes.reduce(
-    (sum, stroke) => sum + stroke.distance,
+    (sum, stroke) => sum + Number(stroke.distance),
     0
   );
 
@@ -75,13 +75,8 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
       newErrors.title = "제목을 입력해주세요.";
     }
 
-    if (
-      !poolLength ||
-      isNaN(Number(poolLength)) ||
-      Number(poolLength) < 25 ||
-      Number(poolLength) > 100
-    ) {
-      newErrors.poolLength = "올바른 수영장 길이를 입력해주세요 (25-100m).";
+    if (!poolLength || (poolLength !== 25 && poolLength !== 50)) {
+      newErrors.poolLength = "수영장 길이를 선택해주세요 (25m 또는 50m).";
     }
 
     if (!sessionStartTime) {
@@ -103,7 +98,7 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
 
     if (
       strokes.length === 0 ||
-      strokes.every((stroke) => stroke.distance === 0)
+      strokes.every((stroke) => stroke.distance === "")
     ) {
       newErrors.strokes = "최소 하나의 영법과 거리를 입력해주세요.";
     }
@@ -119,10 +114,10 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
       onSubmit?.({
         title: title.trim(),
         description: description.trim() || undefined,
-        poolLength: Number(poolLength),
+        poolLength: poolLength,
         sessionStartTime,
         sessionEndTime,
-        strokes: strokes.filter((stroke) => stroke.distance > 0),
+        strokes: strokes.filter((stroke) => Number(stroke.distance) > 0),
         totalDistance,
         totalDuration: Math.max(0, totalDuration),
         calories: calories ? Number(calories) : undefined,
@@ -132,7 +127,7 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
   };
 
   const addStroke = () => {
-    setStrokes([...strokes, { style: "freestyle", distance: 0 }]);
+    setStrokes([...strokes, { style: "freestyle", distance: "" }]);
   };
 
   const removeStroke = (index: number) => {
@@ -174,15 +169,21 @@ const RecordForm: React.FC<RecordFormProps> = ({ onSubmit, onCancel }) => {
           required
         />
 
-        <Input
-          type="number"
-          label="수영장 길이 (미터)"
-          placeholder="예: 25"
-          value={poolLength}
-          onChange={(e) => setPoolLength(e.target.value)}
-          error={errors.poolLength}
-          required
-        />
+        <div className={styles.formGroup}>
+          <label className={styles.label}>수영장 길이 *</label>
+          <select
+            value={poolLength}
+            onChange={(e) => setPoolLength(Number(e.target.value) as 25 | 50)}
+            className={styles.select}
+            required
+          >
+            <option value={25}>25m</option>
+            <option value={50}>50m</option>
+          </select>
+          {errors.poolLength && (
+            <div className={styles.error}>{errors.poolLength}</div>
+          )}
+        </div>
 
         <Input
           type="time"

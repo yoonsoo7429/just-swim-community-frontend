@@ -45,6 +45,17 @@ export interface Comment {
   isLiked?: boolean;
 }
 
+export interface SwimmingComment {
+  id: number;
+  content: string;
+  user: User;
+  swimmingRecordId: number;
+  createdAt: string;
+  updatedAt: string;
+  likes: number;
+  isLiked?: boolean;
+}
+
 export interface CommunityStats {
   totalMembers: number;
   todayPosts: number;
@@ -56,7 +67,7 @@ export interface SwimmingRecord {
   id: number;
   title: string;
   description?: string;
-  poolLength: number; // 수영장 길이 (미터)
+  poolLength: 25 | 50; // 수영장 길이 (25m 또는 50m)
   sessionStartTime: string; // HH:MM 형식
   sessionEndTime: string; // HH:MM 형식
   strokes: StrokeRecord[]; // 여러 영법과 거리
@@ -66,13 +77,16 @@ export interface SwimmingRecord {
   sessionDate?: string;
   visibility: string; // public, private, friends
   user?: User;
+  likesCount: number;
+  commentsCount: number;
+  isLiked?: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface StrokeRecord {
   style: string;
-  distance: number;
+  distance: string;
 }
 
 export interface SwimmingStats {

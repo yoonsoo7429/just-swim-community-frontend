@@ -88,6 +88,26 @@ export const swimmingAPI = {
 
   // 수영 기록 삭제
   deleteRecord: (id: string) => apiClient.delete(`/swimming/${id}`),
+
+  // 좋아요 추가
+  addLike: (id: string) => apiClient.post(`/swimming/${id}/like`),
+
+  // 좋아요 제거
+  removeLike: (id: string) => apiClient.delete(`/swimming/${id}/like`),
+
+  // 좋아요 상태 확인
+  getLikeStatus: (id: string) => apiClient.get(`/swimming/${id}/like-status`),
+
+  // 댓글 목록 조회
+  getComments: (id: string) => apiClient.get(`/swimming/${id}/comments`),
+
+  // 댓글 추가
+  addComment: (id: string, content: string) =>
+    apiClient.post(`/swimming/${id}/comments`, { content }),
+
+  // 댓글 삭제
+  removeComment: (commentId: string) =>
+    apiClient.delete(`/swimming/comments/${commentId}`),
 };
 
 export const trainingAPI = {

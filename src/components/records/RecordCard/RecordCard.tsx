@@ -3,12 +3,14 @@
 import React, { useState } from "react";
 import styles from "./styles.module.scss";
 import Button from "../../ui/Button";
+import Modal from "../../ui/Modal";
 import { SwimmingRecord } from "../../../types";
+import { useAuth } from "../../../contexts/AuthContext";
 
 interface RecordCardProps {
   record: SwimmingRecord;
   onLike?: (id: string) => void;
-  onComment?: (id: string) => void;
+  onComment?: (id: string, content: string) => Promise<any>;
   onShare?: (id: string) => void;
 }
 
@@ -18,7 +20,15 @@ const RecordCard: React.FC<RecordCardProps> = ({
   onComment,
   onShare,
 }) => {
-  const [isLiked, setIsLiked] = useState(false);
+  const { user } = useAuth();
+  console.log("RecordCard rendered with record:", record);
+  const [isLiked, setIsLiked] = useState(record.isLiked || false);
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+  const [commentContent, setCommentContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 현재 사용자가 해당 기록의 작성자인지 확인
+  const isOwnRecord = user && record.user && user.id === record.user.id;
 
   const getStrokeName = (stroke: string) => {
     const strokeNames: { [key: string]: string } = {
@@ -50,8 +60,26 @@ const RecordCard: React.FC<RecordCardProps> = ({
   };
 
   const handleLike = () => {
+    // 자신의 기록에는 좋아요를 누를 수 없음
+    if (isOwnRecord) return;
+
     setIsLiked(!isLiked);
     onLike?.(record.id.toString());
+  };
+
+  const handleCommentSubmit = async () => {
+    if (!commentContent.trim()) return;
+
+    try {
+      setIsSubmitting(true);
+      await onComment?.(record.id.toString(), commentContent);
+      setCommentContent("");
+      setIsCommentModalOpen(false);
+    } catch (error) {
+      // 에러는 상위에서 처리됨
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -131,8 +159,14 @@ const RecordCard: React.FC<RecordCardProps> = ({
 
       <div className={styles.actions}>
         <button
-          className={`${styles.actionButton} ${isLiked ? styles.liked : ""}`}
+          className={`${styles.actionButton} ${isLiked ? styles.liked : ""} ${
+            isOwnRecord ? styles.disabled : ""
+          }`}
           onClick={handleLike}
+          disabled={isOwnRecord || false}
+          title={
+            isOwnRecord ? "자신의 기록에는 좋아요를 누를 수 없습니다" : "좋아요"
+          }
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path
@@ -143,12 +177,14 @@ const RecordCard: React.FC<RecordCardProps> = ({
               strokeLinejoin="round"
             />
           </svg>
-          <span>좋아요</span>
+          <span>
+            {record.likesCount > 0 ? `(${record.likesCount})` : "(0)"}
+          </span>
         </button>
 
         <button
           className={styles.actionButton}
-          onClick={() => onComment?.(record.id.toString())}
+          onClick={() => setIsCommentModalOpen(true)}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path
@@ -159,7 +195,9 @@ const RecordCard: React.FC<RecordCardProps> = ({
               strokeLinejoin="round"
             />
           </svg>
-          <span>댓글</span>
+          <span>
+            댓글 {record.commentsCount > 0 && `(${record.commentsCount})`}
+          </span>
         </button>
 
         <button
@@ -178,6 +216,40 @@ const RecordCard: React.FC<RecordCardProps> = ({
           <span>공유</span>
         </button>
       </div>
+
+      {/* 댓글 입력 모달 */}
+      <Modal
+        isOpen={isCommentModalOpen}
+        onClose={() => setIsCommentModalOpen(false)}
+        title="댓글 작성"
+        size="small"
+      >
+        <div className={styles.commentModal}>
+          <textarea
+            value={commentContent}
+            onChange={(e) => setCommentContent(e.target.value)}
+            placeholder="댓글을 입력하세요..."
+            className={styles.commentInput}
+            rows={4}
+          />
+          <div className={styles.commentActions}>
+            <Button
+              variant="outline"
+              onClick={() => setIsCommentModalOpen(false)}
+              disabled={isSubmitting}
+            >
+              취소
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleCommentSubmit}
+              disabled={!commentContent.trim() || isSubmitting}
+            >
+              {isSubmitting ? "등록 중..." : "댓글 등록"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
