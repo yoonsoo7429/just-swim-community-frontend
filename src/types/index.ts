@@ -104,24 +104,53 @@ export interface SwimmingStats {
 export interface TrainingProgram {
   id: number;
   title: string;
-  description: string;
-  author: User;
-  level: "beginner" | "intermediate" | "advanced";
-  duration: number; // weeks
-  sessions: TrainingSession[];
-  likes: number;
-  comments: number;
+  description?: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  totalWeeks: number;
+  sessionsPerWeek: number;
+  visibility: "public" | "private";
+  isPublished: boolean;
+  userId: number;
+  user?: User;
+  sessions?: TrainingSession[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface TrainingSession {
   id: number;
-  programId: number;
   title: string;
-  description: string;
-  exercises: TrainingExercise[];
-  order: number;
+  description?: string;
+  weekNumber: number;
+  sessionNumber: number;
+  totalDistance: number;
+  estimatedDuration: number;
+  workout: string;
+  trainingProgramId: number;
+  trainingProgram?: TrainingProgram;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTrainingProgramDto {
+  title: string;
+  description?: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  totalWeeks: number;
+  sessionsPerWeek: number;
+  visibility: "public" | "private";
+  isPublished?: boolean;
+}
+
+export interface CreateTrainingSessionDto {
+  title: string;
+  description?: string;
+  weekNumber: number;
+  sessionNumber: number;
+  totalDistance: number;
+  estimatedDuration: number;
+  workout: string;
+  trainingProgramId: number;
 }
 
 export interface TrainingExercise {

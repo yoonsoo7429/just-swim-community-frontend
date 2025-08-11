@@ -117,11 +117,18 @@ export const trainingAPI = {
   // 훈련 프로그램 상세
   getProgram: (id: string) => apiClient.get(`/training/programs/${id}`),
 
+  // 훈련 프로그램 생성
+  createProgram: (data: any) => apiClient.post("/training/programs", data),
+
   // 훈련 세션 목록
   getSessions: () => apiClient.get("/training/sessions"),
 
   // 훈련 세션 생성
   createSession: (data: any) => apiClient.post("/training/sessions", data),
+
+  // 프로그램별 세션 조회
+  getSessionsByProgram: (programId: string) =>
+    apiClient.get(`/training/programs/${programId}/sessions`),
 };
 
 export const usersAPI = {

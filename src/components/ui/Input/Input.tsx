@@ -12,7 +12,7 @@ interface InputProps {
     | "time"
     | "date";
   placeholder?: string;
-  value?: string;
+  value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -24,6 +24,9 @@ interface InputProps {
   error?: string;
   label?: string;
   size?: "small" | "medium" | "large";
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -41,6 +44,9 @@ const Input: React.FC<InputProps> = ({
   error,
   label,
   size = "medium",
+  min,
+  max,
+  step,
 }) => {
   return (
     <div className={`${styles.inputWrapper} ${className}`}>
@@ -61,6 +67,9 @@ const Input: React.FC<InputProps> = ({
         required={required}
         name={name}
         id={id}
+        min={min}
+        max={max}
+        step={step}
         className={`${styles.input} ${styles[size]} ${
           error ? styles.error : ""
         }`}
