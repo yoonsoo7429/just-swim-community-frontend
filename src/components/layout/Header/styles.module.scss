@@ -26,6 +26,16 @@
 .logo {
   flex-shrink: 0;
   width: 200px; // 고정 너비 설정
+
+  .logoLink {
+    text-decoration: none;
+    color: inherit;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
   h1 {
     margin: 0;
     font-size: 24px;

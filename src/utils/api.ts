@@ -138,3 +138,83 @@ export const usersAPI = {
   // 사용자 정보 가져오기
   getUser: (id: string) => apiClient.get(`/users/${id}`),
 };
+
+export const communityAPI = {
+  // 게시물 목록 조회
+  getPosts: () => apiClient.get("/posts"),
+
+  // 카테고리별 게시물 조회
+  getPostsByCategory: (category: string) =>
+    apiClient.get(`/posts/category/${encodeURIComponent(category)}`),
+
+  // 인기 게시물 조회
+  getPopularPosts: () => apiClient.get("/posts/popular"),
+
+  // 게시물 상세 조회
+  getPost: (id: number) => apiClient.get(`/posts/${id}`),
+
+  // 게시물 생성
+  createPost: (postData: {
+    title: string;
+    content: string;
+    category: string;
+    tags?: string[];
+  }) => apiClient.post("/posts", postData),
+
+  // 게시물 수정
+  updatePost: (
+    id: number,
+    postData: {
+      title?: string;
+      content?: string;
+      category?: string;
+      tags?: string[];
+    }
+  ) => apiClient.patch(`/posts/${id}`, postData),
+
+  // 게시물 삭제
+  deletePost: (id: number) => apiClient.delete(`/posts/${id}`),
+
+  // 게시물 좋아요/취소
+  toggleLike: (id: number) => apiClient.post(`/posts/${id}/like`),
+
+  // 게시물 좋아요/취소 (기존 코드 호환성)
+  likePost: (id: number) => apiClient.post(`/posts/${id}/like`),
+
+  // 댓글 목록 조회
+  getComments: (postId: number) => apiClient.get(`/posts/${postId}/comments`),
+
+  // 댓글 생성
+  createComment: (postId: number, commentData: { content: string }) =>
+    apiClient.post(`/posts/${postId}/comments`, commentData),
+
+  // 댓글 수정
+  updateComment: (
+    postId: number,
+    commentId: number,
+    commentData: { content: string }
+  ) => apiClient.patch(`/posts/${postId}/comments/${commentId}`, commentData),
+
+  // 댓글 삭제
+  deleteComment: (postId: number, commentId: number) =>
+    apiClient.delete(`/posts/${postId}/comments/${commentId}`),
+
+  // 댓글 좋아요/취소
+  toggleCommentLike: (postId: number, commentId: number) =>
+    apiClient.post(`/posts/${postId}/comments/${commentId}/like`),
+
+  // 커뮤니티 통계 조회
+  getCommunityStats: () => apiClient.get("/community/stats"),
+
+  // 태그 검색
+  searchByTags: (tags: string[]) =>
+    apiClient.get("/posts/search", {
+      params: { tags: tags.join(",") },
+    }),
+
+  // 제목/내용 검색
+  searchPosts: (query: string) =>
+    apiClient.get("/posts/search", {
+      params: { q: query },
+    }),
+};

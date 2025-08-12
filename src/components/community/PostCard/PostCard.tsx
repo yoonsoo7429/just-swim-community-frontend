@@ -1,6 +1,6 @@
 import React from "react";
 import { Post } from "../../../types";
-import { likePost } from "../../../utils/communityApi";
+import { communityAPI } from "../../../utils/api";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useLikedPosts } from "../../../hooks/useLikedPosts";
 import styles from "./styles.module.scss";
@@ -44,11 +44,12 @@ export default function PostCard({
     }
 
     try {
-      const updatedPost = await likePost(post.id);
-      
+      const response = await communityAPI.toggleLike(post.id);
+      const updatedPost = response.data;
+
       // 로컬 상태 업데이트
       setLiked(post.id, updatedPost.isLiked);
-      
+
       if (onLikeUpdate) {
         onLikeUpdate(updatedPost);
       }

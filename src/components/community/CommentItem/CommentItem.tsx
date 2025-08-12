@@ -1,6 +1,6 @@
 import React from "react";
 import { Comment } from "../../../types";
-import { likeComment, deleteComment } from "../../../utils/communityApi";
+import { communityAPI } from "../../../utils/api";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useLikedComments } from "../../../hooks/useLikedComments";
 import styles from "./styles.module.scss";
@@ -45,7 +45,11 @@ export default function CommentItem({
     }
 
     try {
-      const updatedComment = await likeComment(comment.id);
+      const response = await communityAPI.toggleCommentLike(
+        comment.postId,
+        comment.id
+      );
+      const updatedComment = response.data;
       setLiked(comment.id, updatedComment.isLiked || false);
 
       if (onCommentUpdate) {
@@ -65,7 +69,7 @@ export default function CommentItem({
 
     if (window.confirm("댓글을 삭제하시겠습니까?")) {
       try {
-        await deleteComment(comment.id);
+        await communityAPI.deleteComment(comment.postId, comment.id);
         if (onDelete) {
           onDelete(comment.id);
         }

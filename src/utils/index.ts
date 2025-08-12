@@ -4,7 +4,7 @@ export const formatDate = (date: Date): string => {
 };
 
 export const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat("ko-KR", {
+  return Intl.NumberFormat("ko-KR", {
     style: "currency",
     currency: "KRW",
   }).format(amount);
@@ -20,4 +20,3 @@ export const validatePassword = (password: string): boolean => {
 };
 
 export * from "./api";
-export * from "./communityApi";

@@ -50,15 +50,12 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
       <header className={`${styles.header} ${className}`}>
         <div className={styles.container}>
           <div className={styles.logo}>
-            <h1>Just Swim</h1>
+            <a href="/" className={styles.logoLink}>
+              <h1>Just Swim</h1>
+            </a>
           </div>
           <nav className={styles.navigation}>
             <ul className={styles.navList}>
-              <li>
-                <a href="/" className={styles.navLink}>
-                  홈
-                </a>
-              </li>
               <li>
                 <a href="/records" className={styles.navLink}>
                   수영 기록
@@ -91,16 +88,13 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
     <header className={`${styles.header} ${className}`}>
       <div className={styles.container}>
         <div className={styles.logo}>
-          <h1>Just Swim</h1>
+          <a href="/" className={styles.logoLink}>
+            <h1>Just Swim</h1>
+          </a>
         </div>
 
         <nav className={styles.navigation}>
           <ul className={styles.navList}>
-            <li>
-              <a href="/" className={styles.navLink}>
-                홈
-              </a>
-            </li>
             <li>
               <a href="/records" className={styles.navLink}>
                 수영 기록

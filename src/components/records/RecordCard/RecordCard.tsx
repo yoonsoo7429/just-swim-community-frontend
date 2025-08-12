@@ -110,18 +110,18 @@ const RecordCard: React.FC<RecordCardProps> = ({
       <div className={styles.record}>
         <div className={styles.recordInfo}>
           <div className={styles.distance}>
-            <span className={styles.value}>{record.totalDistance}m</span>
             <span className={styles.label}>총 거리</span>
+            <span className={styles.value}>{record.totalDistance}m</span>
           </div>
           <div className={styles.time}>
+            <span className={styles.label}>총 시간</span>
             <span className={styles.value}>
               {formatDuration(record.totalDuration)}
             </span>
-            <span className={styles.label}>총 시간</span>
           </div>
           <div className={styles.poolLength}>
-            <span className={styles.value}>{record.poolLength}m</span>
             <span className={styles.label}>수영장</span>
+            <span className={styles.value}>{record.poolLength}m</span>
           </div>
         </div>
 

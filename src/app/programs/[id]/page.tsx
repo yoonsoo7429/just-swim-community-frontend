@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Layout } from "../../../components/layout";
-import { TrainingProgram, TrainingSession } from "../../../types";
-import { trainingAPI } from "../../../utils/api";
 import styles from "./page.module.scss";
-import { Button } from "@/components";
+import { Button, Layout } from "@/components";
+import { trainingAPI } from "@/utils";
+import { TrainingProgram, TrainingSession } from "@/types";
 
 const ProgramDetailPage: React.FC = () => {
   const params = useParams();

@@ -4,12 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Layout from "../../../components/layout/Layout";
 import { Post, Comment } from "../../../types";
-import {
-  getPost,
-  getComments,
-  createComment,
-  likePost,
-} from "../../../utils/communityApi";
+import { communityAPI } from "../../../utils/api";
 import { useLikedPosts } from "../../../hooks/useLikedPosts";
 import { CommentItem, CommentForm } from "../../../components/community";
 import styles from "./page.module.scss";
@@ -32,12 +27,12 @@ export default function PostDetail() {
   const loadPost = async () => {
     try {
       setIsLoading(true);
-      const [postData, commentsData] = await Promise.all([
-        getPost(postId),
-        getComments(postId),
+      const [postResponse, commentsResponse] = await Promise.all([
+        communityAPI.getPost(postId),
+        communityAPI.getComments(postId),
       ]);
-      setPost(postData);
-      setComments(commentsData);
+      setPost(postResponse.data);
+      setComments(commentsResponse.data);
     } catch (error) {
       console.error("게시물 로딩 실패:", error);
     } finally {
@@ -49,7 +44,8 @@ export default function PostDetail() {
     if (!post) return;
 
     try {
-      const updatedPost = await likePost(post.id);
+      const response = await communityAPI.toggleLike(post.id);
+      const updatedPost = response.data;
       setLiked(post.id, updatedPost.isLiked || false);
       setPost((prev) =>
         prev
@@ -67,7 +63,8 @@ export default function PostDetail() {
 
   const handleCommentSubmit = async (content: string) => {
     try {
-      const comment = await createComment(postId, content);
+      const response = await communityAPI.createComment(postId, content);
+      const comment = response.data;
       setComments((prev) => [...prev, comment]);
     } catch (error) {
       console.error("댓글 작성 실패:", error);
