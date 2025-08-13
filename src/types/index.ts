@@ -24,6 +24,24 @@ export interface Post {
   updatedAt: string;
   tags?: string[];
   isLiked?: boolean;
+  // 수영 기록 연동 정보
+  swimmingRecord?: {
+    id: number;
+    title: string;
+    totalDistance: number;
+    totalDuration: number;
+    poolLength: number;
+    strokes: StrokeRecord[];
+    calories?: number;
+  };
+  // 훈련 프로그램 연동 정보
+  trainingProgram?: {
+    id: number;
+    title: string;
+    difficulty: string;
+    totalWeeks: number;
+    sessionsPerWeek: number;
+  };
 }
 
 export type PostCategory =

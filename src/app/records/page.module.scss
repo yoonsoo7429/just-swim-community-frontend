@@ -114,10 +114,25 @@
 }
 
 .recordsList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 400px;
+  width: 100%;
+
+  // 빈 상태일 때 중앙 정렬
+  &:has(.emptyState) {
+    justify-content: center;
+  }
+}
+
+.recordsGrid {
   display: grid;
   gap: 1.5rem;
   justify-content: center;
   align-items: start;
+  width: 100%;
 
   // 모바일: 1열
   grid-template-columns: 1fr;
@@ -162,16 +177,42 @@
 
 .emptyState {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 200px;
+  width: 100%;
+  max-width: 400px;
+  min-height: 400px;
   font-size: 1.125rem;
   color: #6b7280;
   text-align: center;
   background: #f9fafb;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 2px dashed #d1d5db;
-  grid-column: 1 / -1;
+  padding: 48px 24px;
+
+  .emptyIcon {
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    color: #666;
+    font-size: 16px;
+    margin: 0 0 24px 0;
+  }
+}
+
+.emptyStateButton {
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
 }
 
 .submitting {

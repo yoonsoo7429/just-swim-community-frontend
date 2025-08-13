@@ -46,24 +46,50 @@ export default function CommunityPage() {
     fetchPosts();
     fetchPopularPosts();
     fetchStats();
-  }, [selectedCategory]);
+
+    // 기존 게시물들의 제목을 실제 수영 기록 제목으로 업데이트
+    const updateTitles = async () => {
+      try {
+        await communityAPI.updateExistingPostTitles();
+        // 제목 업데이트 후 게시물 목록 새로고침
+        fetchPosts();
+        fetchPopularPosts();
+      } catch (error) {
+        console.error("게시물 제목 업데이트 실패:", error);
+      }
+    };
+
+    updateTitles();
+  }, []);
 
   const fetchPosts = async () => {
     try {
       setLoading(true);
       let fetchedPosts;
+
+      console.log("Fetching posts for category:", selectedCategory);
+
       if (selectedCategory === "전체") {
         const response = await communityAPI.getPosts();
+        console.log("All posts response:", response);
         fetchedPosts = response.data;
       } else {
         const response = await communityAPI.getPostsByCategory(
           selectedCategory
         );
+        console.log(`${selectedCategory} posts response:`, response);
         fetchedPosts = response.data;
       }
+
+      console.log("Fetched posts:", fetchedPosts);
       setPosts(fetchedPosts);
     } catch (error) {
       console.error("게시물을 불러오는데 실패했습니다:", error);
+      console.error("Error details:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+        category: selectedCategory,
+      });
     } finally {
       setLoading(false);
     }
@@ -88,14 +114,12 @@ export default function CommunityPage() {
   };
 
   const handlePostCreated = () => {
-    setIsCreateModalOpen(false);
     fetchPosts();
-    fetchStats();
+    setIsCreateModalOpen(false);
   };
 
-  const handlePostDeleted = () => {
-    fetchPosts();
-    fetchStats();
+  const handlePostDeleted = (postId: number) => {
+    setPosts(posts.filter((post) => post.id !== postId));
   };
 
   const handlePostUpdated = () => {
@@ -116,12 +140,23 @@ export default function CommunityPage() {
     title: string;
     content: string;
     category: string;
+    swimmingRecordId?: string;
   }) => {
     try {
-      await communityAPI.createPost(postData);
+      if (postData.category === "기록 공유" && postData.swimmingRecordId) {
+        // 수영 기록 연동 게시물 생성
+        await communityAPI.createSwimmingRecordPost(
+          postData.swimmingRecordId,
+          postData.content
+        );
+      } else {
+        // 일반 게시물 생성
+        await communityAPI.createPost(postData);
+      }
       handlePostCreated();
     } catch (error) {
       console.error("게시물 작성에 실패했습니다:", error);
+      alert("게시물 작성에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -251,6 +286,7 @@ export default function CommunityPage() {
                 post={post}
                 onClick={() => handlePostClick(post.id)}
                 onLikeUpdate={handleLikeUpdate}
+                onDelete={handlePostDeleted}
               />
             ))}
           </div>

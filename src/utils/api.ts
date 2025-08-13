@@ -62,6 +62,9 @@ export const swimmingAPI = {
   // 수영 기록 목록
   getRecords: () => apiClient.get("/swimming"),
 
+  // 수영 기록 상세 조회
+  getRecord: (id: string) => apiClient.get(`/swimming/${id}`),
+
   // 내 수영 기록 목록
   getMyRecords: () => apiClient.get("/swimming/my-records"),
 
@@ -140,8 +143,12 @@ export const usersAPI = {
 };
 
 export const communityAPI = {
-  // 게시물 목록 조회
-  getPosts: () => apiClient.get("/posts"),
+  // 커뮤니티 통계 가져오기
+  getStats: () => apiClient.get("/community/stats"),
+
+  // 게시물 목록 가져오기
+  getPosts: (params?: { category?: string; page?: number; limit?: number }) =>
+    apiClient.get("/posts", { params }),
 
   // 카테고리별 게시물 조회
   getPostsByCategory: (category: string) =>
@@ -150,71 +157,33 @@ export const communityAPI = {
   // 인기 게시물 조회
   getPopularPosts: () => apiClient.get("/posts/popular"),
 
-  // 게시물 상세 조회
-  getPost: (id: number) => apiClient.get(`/posts/${id}`),
+  // 게시물 상세 가져오기
+  getPost: (id: string) => apiClient.get(`/posts/${id}`),
 
   // 게시물 생성
-  createPost: (postData: {
-    title: string;
-    content: string;
-    category: string;
-    tags?: string[];
-  }) => apiClient.post("/posts", postData),
+  createPost: (data: { title: string; content: string; category: string }) =>
+    apiClient.post("/posts", data),
 
-  // 게시물 수정
-  updatePost: (
-    id: number,
-    postData: {
-      title?: string;
-      content?: string;
-      category?: string;
-      tags?: string[];
-    }
-  ) => apiClient.patch(`/posts/${id}`, postData),
+  // 수영 기록을 커뮤니티에 연동하여 게시물 생성
+  createSwimmingRecordPost: (recordId: string, additionalContent?: string) =>
+    apiClient.post("/posts/swimming-record", {
+      recordId,
+      additionalContent,
+    }),
+
+  // 수영 기록의 공유 상태 확인
+  getSwimmingRecordShareStatus: (recordId: string) =>
+    apiClient.get(`/posts/swimming-record/${recordId}/status`),
 
   // 게시물 삭제
-  deletePost: (id: number) => apiClient.delete(`/posts/${id}`),
+  deletePost: (postId: number) => apiClient.delete(`/posts/${postId}`),
 
   // 게시물 좋아요/취소
-  toggleLike: (id: number) => apiClient.post(`/posts/${id}/like`),
+  toggleLike: (postId: number) => apiClient.post(`/posts/${postId}/like`),
 
-  // 게시물 좋아요/취소 (기존 코드 호환성)
-  likePost: (id: number) => apiClient.post(`/posts/${id}/like`),
-
-  // 댓글 목록 조회
-  getComments: (postId: number) => apiClient.get(`/posts/${postId}/comments`),
-
-  // 댓글 생성
-  createComment: (postId: number, commentData: { content: string }) =>
-    apiClient.post(`/posts/${postId}/comments`, commentData),
-
-  // 댓글 수정
-  updateComment: (
-    postId: number,
-    commentId: number,
-    commentData: { content: string }
-  ) => apiClient.patch(`/posts/${postId}/comments/${commentId}`, commentData),
-
-  // 댓글 삭제
-  deleteComment: (postId: number, commentId: number) =>
-    apiClient.delete(`/posts/${postId}/comments/${commentId}`),
-
-  // 댓글 좋아요/취소
-  toggleCommentLike: (postId: number, commentId: number) =>
-    apiClient.post(`/posts/${postId}/comments/${commentId}/like`),
-
-  // 커뮤니티 통계 조회
+  // 커뮤니티 통계 조회 (기존 코드 호환성)
   getCommunityStats: () => apiClient.get("/community/stats"),
 
-  // 태그 검색
-  searchByTags: (tags: string[]) =>
-    apiClient.get("/posts/search", {
-      params: { tags: tags.join(",") },
-    }),
-
-  // 제목/내용 검색
-  searchPosts: (query: string) =>
-    apiClient.get("/posts/search", {
-      params: { q: query },
-    }),
+  // 기존 게시물들의 제목을 업데이트
+  updateExistingPostTitles: () => apiClient.post("/posts/update-titles"),
 };

@@ -89,10 +89,25 @@
 }
 
 .programsGrid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 400px;
+  width: 100%;
+
+  // 빈 상태일 때 중앙 정렬
+  &:has(.emptyState) {
+    justify-content: center;
+  }
+}
+
+.programsGridContent {
   display: grid;
   gap: 1.5rem;
   justify-content: center;
   align-items: start;
+  width: 100%;
 
   // 모바일: 1열
   grid-template-columns: 1fr;

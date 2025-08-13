@@ -122,19 +122,33 @@ const ProgramsPage: React.FC = () => {
         {filteredPrograms.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🏊‍♂️</div>
-            <h3>아직 프로그램이 없습니다</h3>
-            <p>첫 번째 훈련 프로그램을 만들어보세요!</p>
-            <Button
-              variant="primary"
-              onClick={() => setIsCreateModalOpen(true)}
-            >
-              프로그램 만들기
-            </Button>
+            <h3>
+              {filter === "all"
+                ? "아직 프로그램이 없습니다"
+                : `${getDifficultyText(filter)} 프로그램이 없습니다`}
+            </h3>
+            <p>
+              {filter === "all"
+                ? "첫 번째 훈련 프로그램을 만들어보세요!"
+                : "다른 난이도의 프로그램을 확인해보세요"}
+            </p>
+            {filter === "all" && (
+              <Button
+                variant="primary"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                프로그램 만들기
+              </Button>
+            )}
           </div>
         ) : (
-          <div className={styles.programsGrid}>
+          <div className={styles.programsGridContent}>
             {filteredPrograms.map((program) => (
-              <ProgramCard key={program.id} program={program} />
+              <ProgramCard
+                key={program.id}
+                program={program}
+                viewMode="compact"
+              />
             ))}
           </div>
         )}

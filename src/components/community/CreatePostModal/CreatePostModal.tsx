@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { PostCategory } from "../../../types";
+import React, { useState, useEffect } from "react";
+import { PostCategory, SwimmingRecord } from "../../../types";
 import Modal from "../../ui/Modal";
 import Input from "../../ui/Input";
 import Button from "../../ui/Button";
+import { swimmingAPI } from "../../../utils/api";
+import { useAuth } from "../../../contexts/AuthContext";
 import styles from "./styles.module.scss";
 
 interface CreatePostModalProps {
@@ -12,6 +14,7 @@ interface CreatePostModalProps {
     title: string;
     content: string;
     category: PostCategory;
+    swimmingRecordId?: string;
   }) => void;
 }
 
@@ -29,16 +32,41 @@ export default function CreatePostModal({
   onClose,
   onSubmit,
 }: CreatePostModalProps) {
+  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState<PostCategory>("기록 공유");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [myRecords, setMyRecords] = useState<SwimmingRecord[]>([]);
+  const [selectedRecordId, setSelectedRecordId] = useState<string>("");
+  const [showRecordSelector, setShowRecordSelector] = useState(false);
+
+  // 내 수영 기록 가져오기
+  useEffect(() => {
+    if (isOpen && category === "기록 공유") {
+      fetchMyRecords();
+    }
+  }, [isOpen, category]);
+
+  const fetchMyRecords = async () => {
+    try {
+      const response = await swimmingAPI.getMyRecords();
+      setMyRecords(response.data);
+    } catch (error) {
+      console.error("수영 기록 조회 실패:", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim() || !content.trim()) {
       alert("제목과 내용을 모두 입력해주세요.");
+      return;
+    }
+
+    if (category === "기록 공유" && !selectedRecordId) {
+      alert("공유할 수영 기록을 선택해주세요.");
       return;
     }
 
@@ -49,6 +77,8 @@ export default function CreatePostModal({
         title: title.trim(),
         content: content.trim(),
         category,
+        swimmingRecordId:
+          category === "기록 공유" ? selectedRecordId : undefined,
       });
       handleClose();
     } catch (error) {
@@ -63,7 +93,28 @@ export default function CreatePostModal({
     setTitle("");
     setContent("");
     setCategory("기록 공유");
+    setSelectedRecordId("");
+    setShowRecordSelector(false);
     onClose();
+  };
+
+  const handleCategoryChange = (newCategory: PostCategory) => {
+    setCategory(newCategory);
+    if (newCategory === "기록 공유") {
+      setShowRecordSelector(true);
+    } else {
+      setShowRecordSelector(false);
+      setSelectedRecordId("");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   return (
@@ -95,7 +146,9 @@ export default function CreatePostModal({
           <select
             id="category"
             value={category}
-            onChange={(e) => setCategory(e.target.value as PostCategory)}
+            onChange={(e) =>
+              handleCategoryChange(e.target.value as PostCategory)
+            }
             className={styles.select}
           >
             {CATEGORIES.map((cat) => (
@@ -105,6 +158,28 @@ export default function CreatePostModal({
             ))}
           </select>
         </div>
+
+        {showRecordSelector && (
+          <div className={styles.formGroup}>
+            <label htmlFor="record" className={styles.label}>
+              수영 기록 선택
+            </label>
+            <select
+              id="record"
+              value={selectedRecordId}
+              onChange={(e) => setSelectedRecordId(e.target.value)}
+              className={styles.select}
+            >
+              <option value="">수영 기록을 선택해주세요</option>
+              {myRecords.map((record) => (
+                <option key={record.id} value={record.id}>
+                  {formatDate(record.sessionDate || record.createdAt)} -{" "}
+                  {record.totalDistance}m
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className={styles.formGroup}>
           <label htmlFor="content" className={styles.label}>

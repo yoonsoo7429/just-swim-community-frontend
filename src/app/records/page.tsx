@@ -6,27 +6,61 @@ import RecordForm from "../../components/records/RecordForm/RecordForm";
 import RecordCard from "../../components/records/RecordCard/RecordCard";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
-import { swimmingAPI } from "../../utils/api";
+import { swimmingAPI, communityAPI } from "../../utils/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { SwimmingRecord } from "../../types";
 import styles from "./page.module.scss";
 
+interface RecordWithShareStatus extends SwimmingRecord {
+  isShared?: boolean;
+  sharedPostId?: number;
+}
+
 export default function RecordsPage() {
   const { user } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [records, setRecords] = useState<SwimmingRecord[]>([]);
+  const [records, setRecords] = useState<RecordWithShareStatus[]>([]);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // 수영 기록 목록 가져오기
+  // 내 수영 기록 목록 가져오기
   const fetchRecords = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await swimmingAPI.getRecords();
-      setRecords(response.data);
+      const response = await swimmingAPI.getMyRecords();
+      const recordsData = response.data;
+
+      // 각 기록의 공유 상태 확인
+      const recordsWithShareStatus = await Promise.all(
+        recordsData.map(async (record: SwimmingRecord) => {
+          try {
+            const shareStatusResponse =
+              await communityAPI.getSwimmingRecordShareStatus(
+                record.id.toString()
+              );
+            return {
+              ...record,
+              isShared: shareStatusResponse.data.isShared,
+              sharedPostId: shareStatusResponse.data.postId,
+            };
+          } catch (error) {
+            console.error(
+              `공유 상태 확인 실패 (기록 ID: ${record.id}):`,
+              error
+            );
+            return {
+              ...record,
+              isShared: false,
+              sharedPostId: undefined,
+            };
+          }
+        })
+      );
+
+      setRecords(recordsWithShareStatus);
     } catch (err: any) {
       console.error("Failed to fetch records:", err);
       setError("수영 기록을 불러오는데 실패했습니다.");
@@ -54,7 +88,15 @@ export default function RecordsPage() {
     try {
       setSubmitting(true);
       const response = await swimmingAPI.createRecord(recordData);
-      setRecords([response.data, ...records]);
+
+      // 새로 생성된 기록에 공유 상태 추가 (기본적으로 공유되지 않음)
+      const newRecord: RecordWithShareStatus = {
+        ...response.data,
+        isShared: false,
+        sharedPostId: undefined,
+      };
+
+      setRecords([newRecord, ...records]);
       setIsFormOpen(false);
     } catch (err: any) {
       console.error("Failed to create record:", err);
@@ -64,77 +106,18 @@ export default function RecordsPage() {
     }
   };
 
-  const handleLike = async (id: string) => {
-    try {
-      const record = records.find((r) => r.id.toString() === id);
-      if (!record) return;
-
-      if (record.isLiked) {
-        await swimmingAPI.removeLike(id);
-        // 좋아요 제거 후 상태 업데이트
-        setRecords(
-          records.map((r) =>
-            r.id.toString() === id
-              ? {
-                  ...r,
-                  isLiked: false,
-                  likesCount: Math.max(0, r.likesCount - 1),
-                }
-              : r
-          )
-        );
-      } else {
-        await swimmingAPI.addLike(id);
-        // 좋아요 추가 후 상태 업데이트
-        setRecords(
-          records.map((r) =>
-            r.id.toString() === id
-              ? { ...r, isLiked: true, likesCount: r.likesCount + 1 }
-              : r
-          )
-        );
-      }
-    } catch (err: any) {
-      console.error("Failed to toggle like:", err);
-      alert("좋아요 처리에 실패했습니다.");
-    }
-  };
-
-  const handleComment = async (id: string, content: string) => {
-    try {
-      const response = await swimmingAPI.addComment(id, content);
-      // 댓글 추가 후 댓글 수 증가
-      setRecords(
-        records.map((r) =>
-          r.id.toString() === id
-            ? { ...r, commentsCount: r.commentsCount + 1 }
-            : r
-        )
-      );
-      return response.data;
-    } catch (err: any) {
-      console.error("Failed to add comment:", err);
-      alert("댓글 등록에 실패했습니다.");
-      throw err;
-    }
-  };
-
-  const handleShare = (id: string) => {
-    console.log("Share record:", id);
-  };
-
+  // 필터링된 기록 목록
   const filteredRecords = records.filter((record) => {
     if (filter === "all") return true;
-    return record.strokes?.some((stroke) => stroke.style === filter);
+    return record.strokes.some((stroke) => stroke.style === filter);
   });
 
-  // 영법 한글명 매핑
   const styleLabels: { [key: string]: string } = {
+    all: "전체",
     freestyle: "자유형",
     backstroke: "배영",
     breaststroke: "평영",
     butterfly: "접영",
-    medley: "개인혼영",
   };
 
   if (loading) {
@@ -151,7 +134,7 @@ export default function RecordsPage() {
     <Layout>
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>수영 기록</h1>
+          <h1 className={styles.title}>내 수영 기록</h1>
           <Button
             variant="primary"
             onClick={() => setIsFormOpen(true)}
@@ -221,20 +204,39 @@ export default function RecordsPage() {
         <div className={styles.recordsList}>
           {filteredRecords.length === 0 ? (
             <div className={styles.emptyState}>
-              {filter === "all"
-                ? "아직 수영 기록이 없습니다."
-                : `${styleLabels[filter]} 기록이 없습니다.`}
+              <div className={styles.emptyIcon}>🏊‍♂️</div>
+              <h3>
+                {filter === "all"
+                  ? "아직 수영 기록이 없습니다"
+                  : `${styleLabels[filter]} 기록이 없습니다`}
+              </h3>
+              <p>
+                {filter === "all"
+                  ? "첫 번째 수영 기록을 올려보세요!"
+                  : "다른 영법의 기록을 작성해보세요"}
+              </p>
+              {filter === "all" && (
+                <Button
+                  variant="primary"
+                  onClick={() => setIsFormOpen(true)}
+                  className={styles.emptyStateButton}
+                >
+                  기록 올리기
+                </Button>
+              )}
             </div>
           ) : (
-            filteredRecords.map((record) => (
-              <RecordCard
-                key={record.id}
-                record={record}
-                onLike={handleLike}
-                onComment={handleComment}
-                onShare={handleShare}
-              />
-            ))
+            <div className={styles.recordsGrid}>
+              {filteredRecords.map((record) => (
+                <RecordCard
+                  key={record.id}
+                  record={record}
+                  viewMode="compact"
+                  isShared={record.isShared}
+                  sharedPostId={record.sharedPostId}
+                />
+              ))}
+            </div>
           )}
         </div>
 
