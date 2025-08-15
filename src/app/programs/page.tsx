@@ -1,15 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Layout } from "../../components/layout";
-import { TrainingProgram } from "../../types";
-import { trainingAPI } from "../../utils/api";
+import { useRouter } from "next/navigation";
+import Layout from "@/components/layout/Layout";
+import { TrainingProgram } from "@/types";
+import { trainingAPI } from "@/utils/api";
 import styles from "./page.module.scss";
-import { Button } from "@/components";
+import Button from "@/components/ui/Button";
 import { CreateProgramModal, ProgramCard } from "@/components/training";
+import { useAuth } from "@/contexts/AuthContext";
+import SignInButton from "@/components/auth/SignInButton";
+import SignUpButton from "@/components/auth/SignUpButton";
 
 const ProgramsPage: React.FC = () => {
-  const [programs, setPrograms] = useState<TrainingProgram[]>([]);
+  const router = useRouter();
+  const { user, signIn, signUp } = useAuth();
+  const [myPrograms, setMyPrograms] = useState<TrainingProgram[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filter, setFilter] = useState<
@@ -17,49 +23,70 @@ const ProgramsPage: React.FC = () => {
   >("all");
 
   useEffect(() => {
-    fetchPrograms();
-  }, []);
+    if (user) {
+      fetchMyPrograms();
+    } else {
+      setIsLoading(false);
+    }
+  }, [user]);
 
-  const fetchPrograms = async () => {
+  const fetchMyPrograms = async () => {
     try {
       setIsLoading(true);
-      const response = await trainingAPI.getPrograms();
-      setPrograms(response.data);
+      const response = await trainingAPI.getMyPrograms();
+      setMyPrograms(response.data || []);
     } catch (error) {
-      console.error("프로그램 목록 조회 실패:", error);
+      console.error("내 프로그램 목록 조회 실패:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleCreateSuccess = () => {
-    fetchPrograms();
+    fetchMyPrograms();
   };
 
-  const filteredPrograms = programs.filter((program) => {
-    if (filter === "all") return true;
-    return program.difficulty === filter;
-  });
-
-  const getDifficultyText = (difficulty: string) => {
-    switch (difficulty) {
-      case "beginner":
-        return "초급";
-      case "intermediate":
-        return "중급";
-      case "advanced":
-        return "고급";
-      default:
-        return difficulty;
+  const handleSignIn = async (email: string, password: string) => {
+    try {
+      await signIn(email, password);
+    } catch (error) {
+      console.error("Sign in failed:", error);
     }
   };
 
-  if (isLoading) {
+  const handleSignUp = async (
+    email: string,
+    password: string,
+    name: string
+  ) => {
+    try {
+      await signUp(email, password, name);
+    } catch (error) {
+      console.error("Sign up failed:", error);
+    }
+  };
+
+  const getFilteredPrograms = () => {
+    if (filter === "all") return myPrograms;
+    return myPrograms.filter((program) => program.difficulty === filter);
+  };
+
+  const handleProgramClick = (programId: number) => {
+    router.push(`/programs/${programId}`);
+  };
+
+  if (!user) {
     return (
       <Layout>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
-          <p>프로그램을 불러오는 중...</p>
+        <div className={styles.container}>
+          <div className={styles.authContainer}>
+            <h1>내 훈련 프로그램</h1>
+            <p>로그인하여 내 훈련 프로그램을 관리하세요.</p>
+            <div className={styles.authButtons}>
+              <SignInButton onSignIn={handleSignIn} />
+              <SignUpButton onSignUp={handleSignUp} />
+            </div>
+          </div>
         </div>
       </Layout>
     );
@@ -69,22 +96,13 @@ const ProgramsPage: React.FC = () => {
     <Layout>
       <div className={styles.container}>
         <div className={styles.header}>
-          <div className={styles.titleSection}>
-            <h1 className={styles.title}>훈련 프로그램</h1>
-            <p className={styles.subtitle}>
-              체계적인 수영 훈련을 위한 프로그램을 찾아보세요
-            </p>
-          </div>
-          <Button
-            variant="primary"
-            onClick={() => setIsCreateModalOpen(true)}
-            className={styles.createButton}
-          >
+          <h1 className={styles.title}>내 훈련 프로그램</h1>
+          <Button onClick={() => setIsCreateModalOpen(true)}>
             새 프로그램 만들기
           </Button>
         </div>
 
-        <div className={styles.filters}>
+        <div className={styles.filterContainer}>
           <button
             className={`${styles.filterButton} ${
               filter === "all" ? styles.active : ""
@@ -119,46 +137,34 @@ const ProgramsPage: React.FC = () => {
           </button>
         </div>
 
-        {filteredPrograms.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>🏊‍♂️</div>
-            <h3>
-              {filter === "all"
-                ? "아직 프로그램이 없습니다"
-                : `${getDifficultyText(filter)} 프로그램이 없습니다`}
-            </h3>
-            <p>
-              {filter === "all"
-                ? "첫 번째 훈련 프로그램을 만들어보세요!"
-                : "다른 난이도의 프로그램을 확인해보세요"}
-            </p>
-            {filter === "all" && (
-              <Button
-                variant="primary"
-                onClick={() => setIsCreateModalOpen(true)}
-              >
-                프로그램 만들기
-              </Button>
+        {isLoading ? (
+          <div className={styles.loading}>로딩 중...</div>
+        ) : (
+          <div className={styles.programsGrid}>
+            {getFilteredPrograms().length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>아직 만든 훈련 프로그램이 없습니다.</p>
+                <p>새로운 프로그램을 만들어보세요!</p>
+              </div>
+            ) : (
+              getFilteredPrograms().map((program) => (
+                <ProgramCard
+                  key={program.id}
+                  program={program}
+                  showActions={true}
+                  isMyProgram={true}
+                />
+              ))
             )}
           </div>
-        ) : (
-          <div className={styles.programsGridContent}>
-            {filteredPrograms.map((program) => (
-              <ProgramCard
-                key={program.id}
-                program={program}
-                viewMode="compact"
-              />
-            ))}
-          </div>
         )}
-      </div>
 
-      <CreateProgramModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={handleCreateSuccess}
-      />
+        <CreateProgramModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={handleCreateSuccess}
+        />
+      </div>
     </Layout>
   );
 };

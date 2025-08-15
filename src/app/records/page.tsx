@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Layout from "../../components/layout/Layout";
-import RecordForm from "../../components/records/RecordForm/RecordForm";
-import RecordCard from "../../components/records/RecordCard/RecordCard";
-import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/Modal";
-import { swimmingAPI, communityAPI } from "../../utils/api";
-import { useAuth } from "../../contexts/AuthContext";
-import { SwimmingRecord } from "../../types";
+import { useRouter } from "next/navigation";
+import Layout from "@/components/layout/Layout";
+import RecordForm from "@/components/records/RecordForm/RecordForm";
+import RecordCard from "@/components/records/RecordCard/RecordCard";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import { swimmingAPI, communityAPI } from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { SwimmingRecord } from "@/types";
+import SignInButton from "@/components/auth/SignInButton";
+import SignUpButton from "@/components/auth/SignUpButton";
 import styles from "./page.module.scss";
 
 interface RecordWithShareStatus extends SwimmingRecord {
@@ -17,7 +20,8 @@ interface RecordWithShareStatus extends SwimmingRecord {
 }
 
 export default function RecordsPage() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, signIn, signUp } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [records, setRecords] = useState<RecordWithShareStatus[]>([]);
   const [filter, setFilter] = useState("all");
@@ -25,53 +29,26 @@ export default function RecordsPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // 내 수영 기록 목록 가져오기
+  useEffect(() => {
+    if (user) {
+      fetchRecords();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const response = await swimmingAPI.getMyRecords();
-      const recordsData = response.data;
-
-      // 각 기록의 공유 상태 확인
-      const recordsWithShareStatus = await Promise.all(
-        recordsData.map(async (record: SwimmingRecord) => {
-          try {
-            const shareStatusResponse =
-              await communityAPI.getSwimmingRecordShareStatus(
-                record.id.toString()
-              );
-            return {
-              ...record,
-              isShared: shareStatusResponse.data.isShared,
-              sharedPostId: shareStatusResponse.data.postId,
-            };
-          } catch (error) {
-            console.error(
-              `공유 상태 확인 실패 (기록 ID: ${record.id}):`,
-              error
-            );
-            return {
-              ...record,
-              isShared: false,
-              sharedPostId: undefined,
-            };
-          }
-        })
-      );
-
-      setRecords(recordsWithShareStatus);
-    } catch (err: any) {
-      console.error("Failed to fetch records:", err);
-      setError("수영 기록을 불러오는데 실패했습니다.");
+      const response = await swimmingAPI.getRecords();
+      setRecords(response.data || []);
+    } catch (error) {
+      console.error("기록 조회 실패:", error);
+      setError("기록을 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchRecords();
-  }, []);
 
   const handleSubmitRecord = async (recordData: {
     title: string;
@@ -106,6 +83,47 @@ export default function RecordsPage() {
     }
   };
 
+  const handleSignIn = async (email: string, password: string) => {
+    try {
+      await signIn(email, password);
+    } catch (error) {
+      console.error("Sign in failed:", error);
+    }
+  };
+
+  const handleSignUp = async (
+    email: string,
+    password: string,
+    name: string
+  ) => {
+    try {
+      await signUp(email, password, name);
+    } catch (error) {
+      console.error("Sign up failed:", error);
+    }
+  };
+
+  const handleShareRecord = async (record: SwimmingRecord) => {
+    try {
+      // 수영 기록 공유 기능은 백엔드에서 아직 구현되지 않았으므로 임시로 alert만 표시
+      alert("수영 기록 공유 기능은 준비 중입니다.");
+
+      // TODO: 백엔드 구현 후 아래 코드 활성화
+      // const response = await postsAPI.createPost({
+      //   title: `${record.stroke} ${record.distance}m 기록 공유`,
+      //   content: `수영 기록을 공유합니다!`,
+      //   category: "기록 공유",
+      //   swimmingRecordId: record.id.toString(),
+      // });
+
+      // alert("기록이 성공적으로 공유되었습니다!");
+      // fetchRecords(); // 목록 새로고침
+    } catch (error) {
+      console.error("기록 공유 실패:", error);
+      alert("기록 공유에 실패했습니다.");
+    }
+  };
+
   // 필터링된 기록 목록
   const filteredRecords = records.filter((record) => {
     if (filter === "all") return true;
@@ -125,6 +143,37 @@ export default function RecordsPage() {
       <Layout>
         <div className={styles.container}>
           <div className={styles.loading}>수영 기록을 불러오는 중...</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // 로그인하지 않은 사용자 처리
+  if (!user) {
+    return (
+      <Layout>
+        <div className={styles.container}>
+          <div className={styles.loginRequired}>
+            <div className={styles.loginIcon}>🔐</div>
+            <h1>로그인이 필요합니다</h1>
+            <p>
+              수영 기록을 관리하려면 로그인이 필요합니다. 지금 가입하고 개인
+              수영 기록을 시작해보세요!
+            </p>
+            <div className={styles.loginActions}>
+              <SignInButton onSignIn={handleSignIn} />
+              <SignUpButton onSignUp={handleSignUp} />
+            </div>
+            <div className={styles.backToHome}>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/")}
+                className={styles.homeButton}
+              >
+                홈으로 돌아가기
+              </Button>
+            </div>
+          </div>
         </div>
       </Layout>
     );

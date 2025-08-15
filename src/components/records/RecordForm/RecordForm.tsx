@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import styles from "./styles.module.scss";
-import Button from "../../ui/Button";
-import Input from "../../ui/Input";
-import { StrokeRecord } from "../../../types";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import { StrokeRecord } from "@/types";
 
 interface RecordFormProps {
   onSubmit?: (record: {

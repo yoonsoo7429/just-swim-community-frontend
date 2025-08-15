@@ -1,24 +1,29 @@
-import React from "react";
-import { Comment } from "../../../types";
-import { communityAPI } from "../../../utils/api";
-import { useAuth } from "../../../contexts/AuthContext";
-import { useLikedComments } from "../../../hooks/useLikedComments";
+import React, { useState } from "react";
+import { Comment } from "@/types";
+import { commentsAPI } from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLikedComments } from "@/hooks/useLikedComments";
 import styles from "./styles.module.scss";
 
 interface CommentItemProps {
   comment: Comment;
-  onCommentUpdate?: (updatedComment: Comment) => void;
-  onDelete?: (commentId: number) => void;
+  onUpdate: (updatedComment: Comment) => void;
+  onDelete: (commentId: number) => void;
 }
 
 export default function CommentItem({
   comment,
-  onCommentUpdate,
+  onUpdate,
   onDelete,
 }: CommentItemProps) {
-  console.log("Rendering CommentItem:", comment);
   const { user } = useAuth();
   const { isLiked, setLiked } = useLikedComments();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(comment.content);
+
+  const isOwnComment = Boolean(
+    user && comment.author && user.id === comment.author.id
+  );
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -36,89 +41,122 @@ export default function CommentItem({
     return date.toLocaleDateString("ko-KR");
   };
 
-  const handleLikeClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-
+  const handleLikeClick = async () => {
     if (!user) {
       alert("로그인이 필요합니다.");
       return;
     }
 
     try {
-      const response = await communityAPI.toggleCommentLike(
-        comment.postId,
-        comment.id
-      );
+      const response = await commentsAPI.toggleLike(comment.id);
       const updatedComment = response.data;
-      setLiked(comment.id, updatedComment.isLiked || false);
 
-      if (onCommentUpdate) {
-        onCommentUpdate(updatedComment);
-      }
+      // 로컬 상태 업데이트
+      setLiked(comment.id, updatedComment.isLiked);
+
+      // 부모 컴포넌트에 업데이트된 댓글 전달
+      onUpdate(updatedComment);
     } catch (error) {
-      console.error("댓글 좋아요 처리 실패:", error);
+      console.error("좋아요 처리 실패:", error);
       alert("좋아요 처리에 실패했습니다.");
     }
   };
 
-  const handleDelete = async () => {
-    if (!user || comment.author.id !== user.id) {
-      alert("삭제 권한이 없습니다.");
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditContent(comment.content);
+  };
+
+  const handleSave = async () => {
+    if (!editContent.trim()) {
+      alert("댓글 내용을 입력해주세요.");
       return;
     }
 
-    if (window.confirm("댓글을 삭제하시겠습니까?")) {
-      try {
-        await communityAPI.deleteComment(comment.postId, comment.id);
-        if (onDelete) {
-          onDelete(comment.id);
-        }
-      } catch (error) {
-        console.error("댓글 삭제 실패:", error);
-        alert("댓글 삭제에 실패했습니다.");
-      }
+    try {
+      const response = await commentsAPI.updateComment(comment.id.toString(), {
+        content: editContent.trim(),
+      });
+      const updatedComment = response.data;
+      onUpdate(updatedComment);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("댓글 수정 실패:", error);
+      alert("댓글 수정에 실패했습니다.");
     }
   };
 
-  const isAuthor = user && comment.author.id === user.id;
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditContent(comment.content);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      await commentsAPI.deleteComment(comment.id.toString());
+      onDelete(comment.id);
+    } catch (error) {
+      console.error("댓글 삭제 실패:", error);
+      alert("댓글 삭제에 실패했습니다.");
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className={styles.commentItem}>
+        <div className={styles.editForm}>
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className={styles.editTextarea}
+            rows={3}
+          />
+          <div className={styles.editActions}>
+            <button onClick={handleSave} className={styles.saveButton}>
+              저장
+            </button>
+            <button onClick={handleCancel} className={styles.cancelButton}>
+              취소
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.commentItem}>
       <div className={styles.commentHeader}>
         <div className={styles.authorInfo}>
-          <div className={styles.authorAvatar}>
-            {comment.author?.profileImage ? (
-              <img
-                src={comment.author.profileImage}
-                alt={comment.author.name}
-                className={styles.avatar}
-              />
-            ) : (
-              <div className={styles.defaultAvatar}>
-                {comment.author?.name?.charAt(0) || "?"}
-              </div>
-            )}
-          </div>
-          <div className={styles.authorDetails}>
-            <span className={styles.authorName}>
-              {comment.author?.name || "익명"}
-            </span>
-            <span className={styles.commentTime}>
-              {formatTime(comment.createdAt)}
-            </span>
-          </div>
+          <span className={styles.authorName}>
+            {comment.author?.name || "익명"}
+          </span>
+          <span className={styles.commentTime}>
+            {formatTime(comment.createdAt)}
+          </span>
         </div>
-        <div className={styles.commentActions}>
-          {isAuthor && (
+        {isOwnComment && (
+          <div className={styles.commentActions}>
+            <button
+              onClick={handleEdit}
+              className={styles.editButton}
+              title="수정"
+            >
+              ✏️
+            </button>
             <button
               onClick={handleDelete}
               className={styles.deleteButton}
-              title="댓글 삭제"
+              title="삭제"
             >
               🗑️
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className={styles.commentContent}>
@@ -127,13 +165,12 @@ export default function CommentItem({
 
       <div className={styles.commentFooter}>
         <button
+          onClick={handleLikeClick}
           className={`${styles.likeButton} ${
             isLiked(comment.id) ? styles.liked : ""
           }`}
-          onClick={handleLikeClick}
-          disabled={!user}
         >
-          {isLiked(comment.id) ? "❤️" : "🤍"} {comment.likes || 0}
+          ❤️ {comment.likes || 0}
         </button>
       </div>
     </div>

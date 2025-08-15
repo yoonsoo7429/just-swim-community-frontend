@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { CreateTrainingProgramDto } from "../../../types";
-import { trainingAPI } from "../../../utils/api";
+import { CreateTrainingProgramDto } from "@/types";
+import { trainingAPI } from "@/utils/api";
 import styles from "./styles.module.scss";
 import { Button, Input, Modal } from "@/components/ui";
 
@@ -19,10 +19,14 @@ const CreateProgramModal: React.FC<CreateProgramModalProps> = ({
     title: "",
     description: "",
     difficulty: "beginner",
+    type: "regular",
     totalWeeks: 4,
     sessionsPerWeek: 3,
+    totalSessions: 5,
+    estimatedDuration: 60,
     visibility: "public",
     isPublished: false,
+    maxParticipants: 10,
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -50,10 +54,14 @@ const CreateProgramModal: React.FC<CreateProgramModalProps> = ({
         title: "",
         description: "",
         difficulty: "beginner",
+        type: "regular",
         totalWeeks: 4,
         sessionsPerWeek: 3,
+        totalSessions: 5,
+        estimatedDuration: 60,
         visibility: "public",
         isPublished: false,
+        maxParticipants: 10,
       });
     } catch (error) {
       console.error("프로그램 생성 실패:", error);
@@ -106,37 +114,89 @@ const CreateProgramModal: React.FC<CreateProgramModalProps> = ({
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="totalWeeks">총 주차 *</label>
-            <Input
-              id="totalWeeks"
-              type="number"
-              min="1"
-              max="52"
-              value={formData.totalWeeks}
-              onChange={(e) =>
-                handleInputChange("totalWeeks", parseInt(e.target.value))
-              }
-              required
-            />
+            <label htmlFor="type">훈련 타입 *</label>
+            <select
+              id="type"
+              value={formData.type}
+              onChange={(e) => handleInputChange("type", e.target.value)}
+              className={styles.select}
+            >
+              <option value="regular">정기 훈련</option>
+              <option value="short-term">단기 훈련</option>
+            </select>
           </div>
         </div>
 
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label htmlFor="sessionsPerWeek">주당 세션 수 *</label>
-            <Input
-              id="sessionsPerWeek"
-              type="number"
-              min="1"
-              max="7"
-              value={formData.sessionsPerWeek}
-              onChange={(e) =>
-                handleInputChange("sessionsPerWeek", parseInt(e.target.value))
-              }
-              required
-            />
-          </div>
+        {formData.type === "regular" ? (
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="totalWeeks">총 주차 *</label>
+              <Input
+                id="totalWeeks"
+                type="number"
+                min="1"
+                max="52"
+                value={formData.totalWeeks}
+                onChange={(e) =>
+                  handleInputChange("totalWeeks", parseInt(e.target.value))
+                }
+                required
+              />
+            </div>
 
+            <div className={styles.formGroup}>
+              <label htmlFor="sessionsPerWeek">주당 세션 수 *</label>
+              <Input
+                id="sessionsPerWeek"
+                type="number"
+                min="1"
+                max="7"
+                value={formData.sessionsPerWeek}
+                onChange={(e) =>
+                  handleInputChange("sessionsPerWeek", parseInt(e.target.value))
+                }
+                required
+              />
+            </div>
+          </div>
+        ) : (
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="totalSessions">총 세션 수 *</label>
+              <Input
+                id="totalSessions"
+                type="number"
+                min="1"
+                max="100"
+                value={formData.totalSessions}
+                onChange={(e) =>
+                  handleInputChange("totalSessions", parseInt(e.target.value))
+                }
+                required
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="estimatedDuration">예상 소요 시간 (분) *</label>
+              <Input
+                id="estimatedDuration"
+                type="number"
+                min="10"
+                max="480"
+                value={formData.estimatedDuration}
+                onChange={(e) =>
+                  handleInputChange(
+                    "estimatedDuration",
+                    parseInt(e.target.value)
+                  )
+                }
+                required
+              />
+            </div>
+          </div>
+        )}
+
+        <div className={styles.formRow}>
           <div className={styles.formGroup}>
             <label htmlFor="visibility">공개 설정 *</label>
             <select
@@ -149,6 +209,23 @@ const CreateProgramModal: React.FC<CreateProgramModalProps> = ({
               <option value="private">비공개</option>
             </select>
           </div>
+
+          {formData.visibility === "public" && (
+            <div className={styles.formGroup}>
+              <label htmlFor="maxParticipants">최대 참여자 수</label>
+              <Input
+                id="maxParticipants"
+                type="number"
+                min="1"
+                max="100"
+                value={formData.maxParticipants}
+                onChange={(e) =>
+                  handleInputChange("maxParticipants", parseInt(e.target.value))
+                }
+                placeholder="10"
+              />
+            </div>
+          )}
         </div>
 
         <div className={styles.formGroup}>

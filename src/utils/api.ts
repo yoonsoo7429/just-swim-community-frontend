@@ -1,189 +1,228 @@
-import axios from "axios";
+import { apiClient } from "./apiClient";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+// Training Core API - 백엔드에 구현됨
+export const trainingAPI = {
+  // Training Program APIs
+  createProgram: (data: any) => apiClient.post("/training/programs", data),
+  getMyPrograms: () => apiClient.get("/training/programs/my-programs"),
+  getPublicPrograms: () => apiClient.get("/training/programs/public"),
+  getProgramById: (id: number) => apiClient.get(`/training/programs/${id}`),
+  updateProgram: (id: number, data: any) =>
+    apiClient.patch(`/training/programs/${id}`, data),
+  deleteProgram: (id: number) => apiClient.delete(`/training/programs/${id}`),
+  joinProgram: (id: number) => apiClient.post(`/training/programs/${id}/join`),
+  leaveProgram: (id: number) =>
+    apiClient.delete(`/training/programs/${id}/leave`),
+  getProgramParticipants: (id: number) =>
+    apiClient.get(`/training/programs/${id}/participants`),
 
-// axios 인스턴스 생성
-export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true, // 쿠키 포함
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+  // Training Session APIs
+  createSession: (data: any) => apiClient.post("/training/sessions", data),
+  getSessionsByProgram: (programId: number) =>
+    apiClient.get(`/training/programs/${programId}/sessions`),
 
-// 요청 인터셉터 - 토큰 추가
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+  // Training Series APIs
+  createSeries: (data: any) => apiClient.post("/training/series", data),
+  getMySeries: () => apiClient.get("/training/series/my-series"),
+  getPublicSeries: () => apiClient.get("/training/series/public"),
+  getSeries: () => apiClient.get("/training/series"),
+  getSeriesById: (id: number) => apiClient.get(`/training/series/${id}`),
+  updateSeries: (id: number, data: any) =>
+    apiClient.patch(`/training/series/${id}`, data),
+  deleteSeries: (id: number) => apiClient.delete(`/training/series/${id}`),
+  publishSeries: (id: number) =>
+    apiClient.post(`/training/series/${id}/publish`),
+  unpublishSeries: (id: number) =>
+    apiClient.post(`/training/series/${id}/unpublish`),
 
-// 응답 인터셉터 - 에러 처리
-apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response?.status === 401) {
-      // 인증 실패 시 토큰 제거
-      localStorage.removeItem("access_token");
-      window.location.href = "/";
-    }
-    return Promise.reject(error);
-  }
-);
+  // Training Meeting APIs
+  createMeeting: (data: any) => apiClient.post("/training/meetings", data),
+  getMeetingsBySeries: (seriesId: number) =>
+    apiClient.get(`/training/series/${seriesId}/meetings`),
+  getMeetingById: (id: number) => apiClient.get(`/training/meetings/${id}`),
+  updateMeeting: (id: number, data: any) =>
+    apiClient.patch(`/training/meetings/${id}`, data),
+  deleteMeeting: (id: number) => apiClient.delete(`/training/meetings/${id}`),
 
-// API 함수들
-export const authAPI = {
-  // 사용자 정보 가져오기
-  getProfile: () => apiClient.get("/auth/me"),
+  // Meeting Participation APIs
+  joinMeeting: (id: number, data: any) =>
+    apiClient.post(`/training/meetings/${id}/join`, data),
+  leaveMeeting: (id: number) =>
+    apiClient.delete(`/training/meetings/${id}/leave`),
+  getMeetingParticipants: (id: number) =>
+    apiClient.get(`/training/meetings/${id}/participants`),
+  getMyMeetingParticipations: () =>
+    apiClient.get("/training/meetings/my-participations"),
 
-  // 이메일/비밀번호 로그인
-  signin: (data: { email: string; password: string }) =>
-    apiClient.post("/auth/signin", data),
-
-  // 이메일/비밀번호 회원가입
-  signup: (data: { email: string; password: string; name: string }) =>
-    apiClient.post("/auth/signup", data),
-
-  // 로그아웃
-  logout: () => apiClient.get("/auth/logout"),
+  // Auto-generation APIs
+  generateNextMeetings: (seriesId: number) =>
+    apiClient.post(`/training/series/${seriesId}/generate-next-meetings`),
+  generateRecurringMeetings: (seriesId: number, weeks: number) =>
+    apiClient.post(`/training/series/${seriesId}/generate-recurring-meetings`, {
+      weeks,
+    }),
 };
 
+// Auth API - 백엔드에 구현됨
+export const authAPI = {
+  signin: (credentials: { email: string; password: string }) =>
+    apiClient.post("/auth/signin", credentials),
+  signup: (userData: any) => apiClient.post("/auth/signup", userData),
+  logout: () => apiClient.get("/auth/logout"),
+  getProfile: () => apiClient.get("/auth/me"),
+  // 소셜 로그인
+  kakaoAuth: () => apiClient.get("/auth/kakao"),
+  googleAuth: () => apiClient.get("/auth/google"),
+  naverAuth: () => apiClient.get("/auth/naver"),
+};
+
+// User API - 백엔드에 구현됨 (제한적)
+export const userAPI = {
+  getUserById: (id: number) => apiClient.get(`/users/${id}`),
+  // profile과 change-password는 백엔드에 없음
+  // 필요시 추가 구현 필요
+};
+
+// Swimming API - 백엔드에 구현됨
 export const swimmingAPI = {
-  // 수영 기록 목록
   getRecords: () => apiClient.get("/swimming"),
-
-  // 수영 기록 상세 조회
-  getRecord: (id: string) => apiClient.get(`/swimming/${id}`),
-
-  // 내 수영 기록 목록
   getMyRecords: () => apiClient.get("/swimming/my-records"),
-
-  // 최근 수영 기록
+  getRecord: (id: number) => apiClient.get(`/swimming/${id}`),
+  createRecord: (data: any) => apiClient.post("/swimming", data),
+  updateRecord: (id: number, data: any) =>
+    apiClient.patch(`/swimming/${id}`, data),
+  deleteRecord: (id: number) => apiClient.delete(`/swimming/${id}`),
+  // 추가 엔드포인트들
   getRecentRecords: (limit?: number) =>
-    apiClient.get(`/swimming/recent${limit ? `?limit=${limit}` : ""}`),
-
-  // 영법별 수영 기록
+    apiClient.get("/swimming/recent", { params: { limit } }),
   getRecordsByStyle: (style: string) =>
     apiClient.get(`/swimming/style/${style}`),
-
-  // 수영 통계
   getStats: () => apiClient.get("/swimming/stats"),
-
-  // 내 수영 통계
   getMyStats: () => apiClient.get("/swimming/my-stats"),
-
-  // 수영 기록 생성
-  createRecord: (data: any) => apiClient.post("/swimming", data),
-
-  // 수영 기록 수정
-  updateRecord: (id: string, data: any) =>
-    apiClient.patch(`/swimming/${id}`, data),
-
-  // 수영 기록 삭제
-  deleteRecord: (id: string) => apiClient.delete(`/swimming/${id}`),
-
-  // 좋아요 추가
-  addLike: (id: string) => apiClient.post(`/swimming/${id}/like`),
-
-  // 좋아요 제거
-  removeLike: (id: string) => apiClient.delete(`/swimming/${id}/like`),
-
-  // 좋아요 상태 확인
-  getLikeStatus: (id: string) => apiClient.get(`/swimming/${id}/like-status`),
-
-  // 댓글 목록 조회
-  getComments: (id: string) => apiClient.get(`/swimming/${id}/comments`),
-
-  // 댓글 추가
-  addComment: (id: string, content: string) =>
-    apiClient.post(`/swimming/${id}/comments`, { content }),
-
-  // 댓글 삭제
-  removeComment: (commentId: string) =>
+  toggleLike: (id: number) => apiClient.post(`/swimming/${id}/like`),
+  removeLike: (id: number) => apiClient.delete(`/swimming/${id}/like`),
+  getLikeStatus: (id: number) => apiClient.get(`/swimming/${id}/like-status`),
+  // 댓글 관련
+  getComments: (id: number) => apiClient.get(`/swimming/${id}/comments`),
+  addComment: (id: number, data: any) =>
+    apiClient.post(`/swimming/${id}/comments`, data),
+  removeComment: (commentId: number) =>
     apiClient.delete(`/swimming/comments/${commentId}`),
 };
 
-export const trainingAPI = {
-  // 훈련 프로그램 목록
-  getPrograms: () => apiClient.get("/training/programs"),
-
-  // 훈련 프로그램 상세
-  getProgram: (id: string) => apiClient.get(`/training/programs/${id}`),
-
-  // 훈련 프로그램 생성
-  createProgram: (data: any) => apiClient.post("/training/programs", data),
-
-  // 훈련 세션 목록
-  getSessions: () => apiClient.get("/training/sessions"),
-
-  // 훈련 세션 생성
-  createSession: (data: any) => apiClient.post("/training/sessions", data),
-
-  // 프로그램별 세션 조회
-  getSessionsByProgram: (programId: string) =>
-    apiClient.get(`/training/programs/${programId}/sessions`),
-};
-
-export const usersAPI = {
-  // 사용자 정보 수정
-  updateProfile: (data: any) => apiClient.patch("/users/profile", data),
-
-  // 사용자 정보 가져오기
-  getUser: (id: string) => apiClient.get(`/users/${id}`),
-};
-
-export const communityAPI = {
-  // 커뮤니티 통계 가져오기
-  getStats: () => apiClient.get("/community/stats"),
-
-  // 게시물 목록 가져오기
-  getPosts: (params?: { category?: string; page?: number; limit?: number }) =>
-    apiClient.get("/posts", { params }),
-
-  // 카테고리별 게시물 조회
+// Posts API - 백엔드에 구현됨
+export const postsAPI = {
+  getPosts: () => apiClient.get("/posts"),
+  getPostById: (id: number) => apiClient.get(`/posts/${id}`),
+  createPost: (data: any) => apiClient.post("/posts", data),
+  updatePost: (id: number, data: any) => apiClient.patch(`/posts/${id}`, data),
+  deletePost: (id: number) => apiClient.delete(`/posts/${id}`),
   getPostsByCategory: (category: string) =>
-    apiClient.get(`/posts/category/${encodeURIComponent(category)}`),
-
-  // 인기 게시물 조회
+    apiClient.get(`/posts/category/${category}`),
   getPopularPosts: () => apiClient.get("/posts/popular"),
-
-  // 게시물 상세 가져오기
-  getPost: (id: string) => apiClient.get(`/posts/${id}`),
-
-  // 게시물 생성
-  createPost: (data: { title: string; content: string; category: string }) =>
-    apiClient.post("/posts", data),
-
-  // 수영 기록을 커뮤니티에 연동하여 게시물 생성
-  createSwimmingRecordPost: (recordId: string, additionalContent?: string) =>
-    apiClient.post("/posts/swimming-record", {
-      recordId,
-      additionalContent,
-    }),
-
-  // 수영 기록의 공유 상태 확인
-  getSwimmingRecordShareStatus: (recordId: string) =>
-    apiClient.get(`/posts/swimming-record/${recordId}/status`),
-
-  // 게시물 삭제
-  deletePost: (postId: number) => apiClient.delete(`/posts/${postId}`),
-
-  // 게시물 좋아요/취소
   toggleLike: (postId: number) => apiClient.post(`/posts/${postId}/like`),
-
-  // 커뮤니티 통계 조회 (기존 코드 호환성)
-  getCommunityStats: () => apiClient.get("/community/stats"),
-
-  // 기존 게시물들의 제목을 업데이트
-  updateExistingPostTitles: () => apiClient.post("/posts/update-titles"),
+  // 추가 엔드포인트들
+  createSwimmingRecordPost: (recordId: number, additionalContent?: string) =>
+    apiClient.post("/posts/swimming-record", { recordId, additionalContent }),
+  createTrainingProgramPost: (programId: number, additionalContent?: string) =>
+    apiClient.post("/posts/training-program", { programId, additionalContent }),
+  createTrainingSeriesPost: (seriesId: number, additionalContent?: string) =>
+    apiClient.post("/posts/training-series", { seriesId, additionalContent }),
+  getSwimmingRecordShareStatus: (recordId: number) =>
+    apiClient.get(`/posts/swimming-record/${recordId}/status`),
+  getTrainingProgramShareStatus: (programId: number) =>
+    apiClient.get(`/posts/training-program/${programId}/status`),
 };
+
+// Comments API - 백엔드에 구현됨 (posts 컨트롤러 내부)
+export const commentsAPI = {
+  getCommentsByPost: (postId: number) =>
+    apiClient.get(`/posts/${postId}/comments`),
+  createComment: (postId: number, data: any) =>
+    apiClient.post(`/posts/${postId}/comments`, data),
+  // updateComment와 deleteComment는 백엔드에 별도 엔드포인트 없음
+  // posts 컨트롤러 내부에서만 처리
+};
+
+// Community API - 백엔드에 제한적으로 구현됨
+export const communityAPI = {
+  getStats: () => apiClient.get("/community/stats"),
+  getPopularPosts: () => apiClient.get("/community/popular"),
+  getTrendingPosts: () => apiClient.get("/community/trending"),
+  searchPosts: (query: string, category?: string) =>
+    apiClient.get("/community/search", { params: { q: query, category } }),
+  getPopularTags: () => apiClient.get("/community/tags"),
+  getCategories: () => apiClient.get("/community/categories"),
+  getRecentPosts: () => apiClient.get("/community/recent"),
+  getRecommendedPosts: () => apiClient.get("/community/recommendations"),
+  getCommunityStats: () => apiClient.get("/community/stats"),
+  // 게시물 상세 및 댓글 관련 메서드 추가
+  getPost: (postId: number) => apiClient.get(`/posts/${postId}`),
+  getComments: (postId: number) => apiClient.get(`/posts/${postId}/comments`),
+  createComment: (postId: number, content: string) =>
+    apiClient.post(`/posts/${postId}/comments`, { content }),
+  toggleLike: (postId: number) => apiClient.post(`/posts/${postId}/like`),
+  // 공유 상태 확인 메서드 추가
+  getSwimmingRecordShareStatus: (recordId: number) =>
+    apiClient.get(`/posts/swimming-record/${recordId}/status`),
+  getTrainingProgramShareStatus: (programId: number) =>
+    apiClient.get(`/posts/training-program/${programId}/status`),
+};
+
+// Training Progress API - 백엔드에 구현됨
+export const trainingProgressAPI = {
+  // Program Progress APIs
+  startProgram: (programId: number, totalSessions: number) =>
+    apiClient.post(`/training-progress/programs/${programId}/start`, {
+      totalSessions,
+    }),
+  getProgramProgress: (programId: number) =>
+    apiClient.get(`/training-progress/programs/${programId}/progress`),
+  getMyProgramsProgress: () =>
+    apiClient.get("/training-progress/programs/my-progress"),
+
+  // Session Completion APIs
+  completeSession: (
+    sessionId: number,
+    programId: number,
+    completionData: any
+  ) =>
+    apiClient.post(`/training-progress/sessions/${sessionId}/complete`, {
+      programId,
+      ...completionData,
+    }),
+  updateSessionCompletion: (sessionId: number, updateData: any) =>
+    apiClient.patch(
+      `/training-progress/sessions/${sessionId}/completion`,
+      updateData
+    ),
+  deleteSessionCompletion: (sessionId: number) =>
+    apiClient.delete(`/training-progress/sessions/${sessionId}/completion`),
+};
+
+export const trainingReviewAPI = {
+  // Program Review APIs
+  createProgramReview: (programId: number, reviewData: any) =>
+    apiClient.post(
+      `/training-review/programs/${programId}/reviews`,
+      reviewData
+    ),
+  getProgramReviews: (programId: number) =>
+    apiClient.get(`/training-review/programs/${programId}/reviews`),
+  getProgramReviewStatistics: (programId: number) =>
+    apiClient.get(`/training-review/programs/${programId}/reviews/statistics`),
+
+  // Review Management APIs
+  getReviewById: (reviewId: number) =>
+    apiClient.get(`/training-review/reviews/${reviewId}`),
+  updateProgramReview: (reviewId: number, updateData: any) =>
+    apiClient.patch(`/training-review/reviews/${reviewId}`, updateData),
+  deleteProgramReview: (reviewId: number) =>
+    apiClient.delete(`/training-review/reviews/${reviewId}`),
+  getMyReviews: () => apiClient.get("/training-review/reviews/my"),
+};
+
+// TODO: 백엔드에 구현되지 않은 API들 - 추후 구현 필요
+// - community-recruitment/*
+// - comments CRUD (별도 엔드포인트)
+// - users/profile, users/change-password

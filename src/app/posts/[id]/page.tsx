@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import Layout from "../../../components/layout/Layout";
-import { Post, Comment } from "../../../types";
-import { communityAPI } from "../../../utils/api";
-import { useLikedPosts } from "../../../hooks/useLikedPosts";
-import { CommentItem, CommentForm } from "../../../components/community";
+import Layout from "@/components/layout/Layout";
+import { Post, Comment } from "@/types";
+import { communityAPI } from "@/utils/api";
+import { useLikedPosts } from "@/hooks/useLikedPosts";
+import { CommentItem, CommentForm } from "@/components/community";
 import styles from "./page.module.scss";
 
 export default function PostDetail() {
@@ -20,11 +20,11 @@ export default function PostDetail() {
 
   useEffect(() => {
     if (postId) {
-      loadPost();
+      loadData();
     }
   }, [postId]);
 
-  const loadPost = async () => {
+  const loadData = async () => {
     try {
       setIsLoading(true);
       const [postResponse, commentsResponse] = await Promise.all([
@@ -173,7 +173,7 @@ export default function PostDetail() {
                   <CommentItem
                     key={comment.id}
                     comment={comment}
-                    onCommentUpdate={handleCommentUpdate}
+                    onUpdate={handleCommentUpdate}
                     onDelete={handleCommentDelete}
                   />
                 ))

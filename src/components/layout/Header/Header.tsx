@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import SignInButton from "@/components/auth/SignInButton";
+import SignUpButton from "@/components/auth/SignUpButton";
+import { useAuth } from "@/contexts/AuthContext";
+import Button from "@/components/ui/Button";
 import styles from "./styles.module.scss";
-import SignInButton from "../../auth/SignInButton";
-import SignUpButton from "../../auth/SignUpButton";
-import { useAuth } from "../../../contexts/AuthContext";
-import Button from "../../ui/Button";
 
 interface HeaderProps {
   className?: string;
@@ -13,11 +13,14 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ className = "" }) => {
   const { user, signOut, signIn, signUp, isLoading, isInitialized } = useAuth();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
 
   const handleSignIn = async (email: string, password: string) => {
     try {
       await signIn(email, password);
       console.log("Header - Sign in completed");
+      setIsLoginModalOpen(false);
     } catch (error) {
       console.error("Sign in failed:", error);
     }
@@ -31,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
     try {
       await signUp(email, password, name);
       console.log("Header - Sign up completed");
+      setIsSignupModalOpen(false);
     } catch (error) {
       console.error("Sign up failed:", error);
     }
@@ -54,25 +58,6 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
               <h1>Just Swim</h1>
             </a>
           </div>
-          <nav className={styles.navigation}>
-            <ul className={styles.navList}>
-              <li>
-                <a href="/records" className={styles.navLink}>
-                  수영 기록
-                </a>
-              </li>
-              <li>
-                <a href="/programs" className={styles.navLink}>
-                  훈련 프로그램
-                </a>
-              </li>
-              <li>
-                <a href="/community" className={styles.navLink}>
-                  커뮤니티
-                </a>
-              </li>
-            </ul>
-          </nav>
           <div className={styles.authButtons}>
             <div className={styles.loadingSkeleton}>
               <div className={styles.skeletonButton}></div>
@@ -93,26 +78,6 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
           </a>
         </div>
 
-        <nav className={styles.navigation}>
-          <ul className={styles.navList}>
-            <li>
-              <a href="/records" className={styles.navLink}>
-                수영 기록
-              </a>
-            </li>
-            <li>
-              <a href="/programs" className={styles.navLink}>
-                훈련 프로그램
-              </a>
-            </li>
-            <li>
-              <a href="/community" className={styles.navLink}>
-                커뮤니티
-              </a>
-            </li>
-          </ul>
-        </nav>
-
         <div className={styles.authButtons}>
           {user ? (
             <>
@@ -126,13 +91,6 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
                   />
                 )}
               </div>
-              <Button
-                variant="secondary"
-                onClick={() => (window.location.href = "/profile")}
-                className={styles.profileButton}
-              >
-                마이페이지
-              </Button>
               <Button
                 variant="outline"
                 onClick={handleLogout}

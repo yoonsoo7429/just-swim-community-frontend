@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import styles from "./styles.module.scss";
-import Button from "../../ui/Button";
-import Modal from "../../ui/Modal";
-import Input from "../../ui/Input";
-import SocialLoginButton from "../SocialLoginButton";
-import { useAuth } from "../../../contexts/AuthContext";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import Input from "@/components/ui/Input";
+import SocialLoginButton from "@/components/auth/SocialLoginButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SignUpButtonProps {
   onSignUp?: (email: string, password: string, confirmPassword: string) => void;

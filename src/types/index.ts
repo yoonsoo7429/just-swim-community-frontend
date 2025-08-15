@@ -124,10 +124,19 @@ export interface TrainingProgram {
   title: string;
   description?: string;
   difficulty: "beginner" | "intermediate" | "advanced";
-  totalWeeks: number;
-  sessionsPerWeek: number;
+  type: "regular" | "short-term"; // 정기 훈련 | 단기 훈련
+  // 정기 훈련용 필드들
+  totalWeeks?: number; // 총 주차 (정기 훈련일 때만)
+  sessionsPerWeek?: number; // 주당 세션 수 (정기 훈련일 때만)
+  // 단기 훈련용 필드들
+  totalSessions?: number; // 총 세션 수 (단기 훈련일 때만)
+  estimatedDuration?: number; // 예상 소요 시간 (분, 단기 훈련일 때만)
+  // 공통 필드들
   visibility: "public" | "private";
   isPublished: boolean;
+  participantsCount: number;
+  maxParticipants?: number;
+  isParticipating?: boolean;
   userId: number;
   user?: User;
   sessions?: TrainingSession[];
@@ -139,13 +148,33 @@ export interface TrainingSession {
   id: number;
   title: string;
   description?: string;
-  weekNumber: number;
-  sessionNumber: number;
+  // 정기 훈련용 필드들
+  weekNumber?: number; // 주차 (정기 훈련일 때만)
+  sessionNumber?: number; // 회차 (정기 훈련일 때만)
+  // 단기 훈련용 필드들
+  order?: number; // 순서 (단기 훈련일 때만)
+  // 공통 필드들
   totalDistance: number;
   estimatedDuration: number;
   workout: string;
   trainingProgramId: number;
   trainingProgram?: TrainingProgram;
+  userId: number;
+  user?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrainingProgramParticipation {
+  id: number;
+  userId: number;
+  user: User;
+  trainingProgramId: number;
+  trainingProgram: TrainingProgram;
+  status: "active" | "completed" | "dropped";
+  startDate: string;
+  lastSessionDate?: string;
+  progress: number; // 진행률 (0-100)
   createdAt: string;
   updatedAt: string;
 }
@@ -154,10 +183,16 @@ export interface CreateTrainingProgramDto {
   title: string;
   description?: string;
   difficulty: "beginner" | "intermediate" | "advanced";
-  totalWeeks: number;
-  sessionsPerWeek: number;
+  type: "regular" | "short-term";
+  // 정기 훈련일 때
+  totalWeeks?: number;
+  sessionsPerWeek?: number;
+  // 단기 훈련일 때
+  totalSessions?: number;
+  estimatedDuration?: number;
   visibility: "public" | "private";
   isPublished?: boolean;
+  maxParticipants?: number;
 }
 
 export interface CreateTrainingSessionDto {
@@ -285,4 +320,102 @@ export interface ModalProps {
   children: React.ReactNode;
   size?: "small" | "medium" | "large";
   showCloseButton?: boolean;
+}
+
+export interface TrainingSeries {
+  id: number;
+  title: string;
+  description?: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  type: "one-time" | "recurring";
+  // 반복 설정
+  repeatDays?: string[]; // ['monday', 'wednesday', 'friday']
+  repeatTime?: string; // "19:00"
+  duration?: number; // 분 단위
+  startDate?: string;
+  endDate?: string;
+  // 기본 설정
+  defaultLocation?: string;
+  defaultMinParticipants: number;
+  defaultMaxParticipants: number;
+  // 상태
+  isActive: boolean;
+  isPublished: boolean;
+  // 관계
+  userId: number;
+  user?: User;
+  trainingProgramId: number;
+  trainingProgram?: TrainingProgram;
+  meetings?: TrainingMeeting[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrainingMeeting {
+  id: number;
+  title: string;
+  description?: string;
+  meetingDate: string;
+  startTime: string;
+  duration: number;
+  location: string;
+  minParticipants: number;
+  maxParticipants: number;
+  currentParticipants: number;
+  status: "open" | "full" | "cancelled" | "completed";
+  specialNotes?: string;
+  isModified: boolean;
+  seriesId: number;
+  series?: TrainingSeries;
+  participations?: TrainingMeetingParticipation[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrainingMeetingParticipation {
+  id: number;
+  status: "confirmed" | "waiting" | "cancelled";
+  notes?: string;
+  isRegularParticipant: boolean;
+  userId: number;
+  user?: User;
+  meetingId: number;
+  meeting?: TrainingMeeting;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateTrainingSeriesDto {
+  title: string;
+  description?: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  type: "one-time" | "recurring";
+  repeatDays?: string[];
+  repeatTime?: string;
+  duration?: number;
+  startDate?: string;
+  endDate?: string;
+  defaultLocation?: string;
+  defaultMinParticipants: number;
+  defaultMaxParticipants: number;
+  trainingProgramId: number;
+}
+
+export interface CreateTrainingMeetingDto {
+  title: string;
+  description?: string;
+  meetingDate: string;
+  startTime: string;
+  estimatedDuration: number;
+  location: string;
+  minParticipants: number;
+  maxParticipants: number;
+  specialNotes?: string;
+  seriesId: number;
+}
+
+export interface JoinMeetingDto {
+  meetingId: number;
+  isRegularParticipant?: boolean;
+  notes?: string;
 }

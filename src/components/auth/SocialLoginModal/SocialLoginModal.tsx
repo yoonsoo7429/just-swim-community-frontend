@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import styles from "./styles.module.scss";
-import Modal from "../../ui/Modal";
-import SocialLoginButton from "../SocialLoginButton";
-import Input from "../../ui/Input";
-import Button from "../../ui/Button";
-import { useAuth } from "../../../contexts/AuthContext";
+import Modal from "@/components/ui/Modal";
+import SocialLoginButton from "@/components/auth/SocialLoginButton";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SocialLoginModalProps {
   isOpen: boolean;

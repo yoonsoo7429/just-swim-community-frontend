@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Button from "@/components/ui/Button";
+import SocialLoginModal from "@/components/auth/SocialLoginModal";
 import styles from "./styles.module.scss";
-import Button from "../../ui/Button";
-import SocialLoginModal from "../SocialLoginModal";
 
 interface SignInButtonProps {
   onSignIn?: (email: string, password: string) => void;

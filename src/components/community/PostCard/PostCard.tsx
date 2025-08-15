@@ -1,8 +1,8 @@
 import React from "react";
-import { Post } from "../../../types";
-import { communityAPI } from "../../../utils/api";
-import { useAuth } from "../../../contexts/AuthContext";
-import { useLikedPosts } from "../../../hooks/useLikedPosts";
+import { Post } from "@/types";
+import { postsAPI } from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLikedPosts } from "@/hooks/useLikedPosts";
 import { useRouter } from "next/navigation";
 import styles from "./styles.module.scss";
 
@@ -71,10 +71,8 @@ export default function PostCard({
     }
 
     try {
-      const response = await communityAPI.toggleLike(post.id);
-      const updatedPost = response.data;
-
-      // 로컬 상태 업데이트
+      // 좋아요 기능은 백엔드에서 아직 구현되지 않았으므로 임시로 로컬 상태만 업데이트
+      const updatedPost = { ...post, isLiked: !isLiked(post.id) };
       setLiked(post.id, updatedPost.isLiked);
 
       if (onLikeUpdate) {
@@ -98,97 +96,120 @@ export default function PostCard({
 
     if (!isOwnPost) return;
 
-    if (confirm("정말로 이 게시물을 삭제하시겠습니까?")) {
-      try {
-        await communityAPI.deletePost(post.id);
-        if (onDelete) {
-          onDelete(post.id);
-        }
-      } catch (error) {
-        console.error("게시물 삭제 실패:", error);
-        alert("게시물 삭제에 실패했습니다. 다시 시도해주세요.");
+    if (!confirm("정말로 이 게시물을 삭제하시겠습니까?")) {
+      return;
+    }
+
+    try {
+      await postsAPI.deletePost(post.id.toString());
+      if (onDelete) {
+        onDelete(post.id);
       }
+    } catch (error) {
+      console.error("게시물 삭제 실패:", error);
+      alert("게시물 삭제에 실패했습니다.");
+    }
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/posts/${post.id}/edit`);
+  };
+
+  const handlePostClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      router.push(`/posts/${post.id}`);
     }
   };
 
   return (
-    <div className={styles.postCard} onClick={onClick}>
+    <div className={styles.postCard} onClick={handlePostClick}>
       <div className={styles.postHeader}>
-        <span className={styles.category}>{post.category}</span>
-        <span className={styles.time}>{formatTime(post.createdAt)}</span>
-      </div>
-      <h3 className={styles.postTitle}>{post.title}</h3>
-
-      {/* 연동된 수영 기록 표시 */}
-      {post.swimmingRecord && (
-        <div className={styles.linkedRecord} onClick={handleRecordClick}>
-          <div className={styles.recordHeader}>
-            <span className={styles.recordIcon}>🏊‍♂️</span>
-            <span className={styles.recordTitle}>연동된 수영 기록</span>
-            <span className={styles.viewRecord}>상세 보기 →</span>
-          </div>
-          <div className={styles.recordStats}>
-            <div className={styles.recordStat}>
-              <span className={styles.statValue}>
-                {post.swimmingRecord.totalDistance}m
-              </span>
-              <span className={styles.statLabel}>거리</span>
-            </div>
-            <div className={styles.recordStat}>
-              <span className={styles.statValue}>
-                {formatDuration(post.swimmingRecord.totalDuration)}
-              </span>
-              <span className={styles.statLabel}>시간</span>
-            </div>
-            <div className={styles.recordStat}>
-              <span className={styles.statValue}>
-                {post.swimmingRecord.poolLength}m
-              </span>
-              <span className={styles.statLabel}>수영장</span>
-            </div>
-            {post.swimmingRecord.calories && (
-              <div className={styles.recordStat}>
-                <span className={styles.statValue}>
-                  {post.swimmingRecord.calories}
-                </span>
-                <span className={styles.statLabel}>kcal</span>
+        <div className={styles.authorInfo}>
+          <div className={styles.avatar}>
+            {post.author?.profileImage ? (
+              <img
+                src={post.author.profileImage}
+                alt={post.author.name}
+                className={styles.avatarImage}
+              />
+            ) : (
+              <div className={styles.avatarPlaceholder}>
+                {post.author?.name?.charAt(0) || "?"}
               </div>
             )}
           </div>
-          {post.swimmingRecord.strokes &&
-            post.swimmingRecord.strokes.length > 0 && (
-              <div className={styles.recordStrokes}>
-                <span className={styles.strokesLabel}>영법별 거리:</span>
-                {post.swimmingRecord.strokes.map((stroke, index) => (
-                  <span key={index} className={styles.strokeItem}>
-                    {getStrokeName(stroke.style)} {stroke.distance}m
-                  </span>
-                ))}
-              </div>
-            )}
+          <div className={styles.authorDetails}>
+            <span className={styles.authorName}>
+              {post.author?.name || "익명"}
+            </span>
+            <span className={styles.postTime}>
+              {formatTime(post.createdAt)}
+            </span>
+          </div>
         </div>
-      )}
 
-      <div className={styles.postMeta}>
-        <span className={styles.author}>by {post.author?.name || "익명"}</span>
-        <div className={styles.engagement}>
-          <span
-            className={styles.likes}
-            onClick={handleLikeClick}
-            style={{ cursor: user ? "pointer" : "default" }}
-          >
-            {isLiked(post.id) ? "❤️" : "🤍"} {post.likes}
-          </span>
-          <span className={styles.comments}>💬 {post.comments}</span>
-          {isOwnPost && (
+        {isOwnPost && (
+          <div className={styles.postActions}>
             <button
-              className={styles.deleteButton}
+              onClick={handleEdit}
+              className={styles.editButton}
+              title="수정"
+            >
+              ✏️
+            </button>
+            <button
               onClick={handleDelete}
-              title="게시물 삭제"
+              className={styles.deleteButton}
+              title="삭제"
             >
               🗑️
             </button>
-          )}
+          </div>
+        )}
+      </div>
+
+      <div className={styles.postContent}>
+        <h3 className={styles.postTitle}>{post.title}</h3>
+        <p className={styles.postText}>{post.content}</p>
+
+        {post.category && (
+          <span className={styles.postCategory}>{post.category}</span>
+        )}
+      </div>
+
+      {post.swimmingRecord && (
+        <div className={styles.recordPreview} onClick={handleRecordClick}>
+          <div className={styles.recordHeader}>
+            <span className={styles.recordLabel}>📊 수영 기록</span>
+            <span className={styles.recordTime}>
+              {formatDuration(post.swimmingRecord.duration)}
+            </span>
+          </div>
+          <div className={styles.recordDetails}>
+            <span className={styles.recordStroke}>
+              {getStrokeName(post.swimmingRecord.stroke)}
+            </span>
+            <span className={styles.recordDistance}>
+              {post.swimmingRecord.distance}m
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className={styles.postFooter}>
+        <div className={styles.engagement}>
+          <button
+            onClick={handleLikeClick}
+            className={`${styles.likeButton} ${
+              isLiked(post.id) ? styles.liked : ""
+            }`}
+          >
+            ❤️ {post.likes || 0}
+          </button>
+          <span className={styles.commentsCount}>💬 {post.comments || 0}</span>
         </div>
       </div>
     </div>

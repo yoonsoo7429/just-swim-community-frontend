@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "../../../contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.scss";
 
 export default function AuthSuccessPage() {

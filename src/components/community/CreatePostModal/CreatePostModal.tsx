@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { PostCategory, SwimmingRecord } from "../../../types";
-import Modal from "../../ui/Modal";
-import Input from "../../ui/Input";
-import Button from "../../ui/Button";
-import { swimmingAPI } from "../../../utils/api";
-import { useAuth } from "../../../contexts/AuthContext";
+import { PostCategory, SwimmingRecord } from "@/types";
+import Modal from "@/components/ui/Modal";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import { swimmingAPI } from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
 import styles from "./styles.module.scss";
 
 interface CreatePostModalProps {
@@ -41,7 +41,6 @@ export default function CreatePostModal({
   const [selectedRecordId, setSelectedRecordId] = useState<string>("");
   const [showRecordSelector, setShowRecordSelector] = useState(false);
 
-  // 내 수영 기록 가져오기
   useEffect(() => {
     if (isOpen && category === "기록 공유") {
       fetchMyRecords();

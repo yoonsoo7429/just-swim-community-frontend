@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Layout from "../../../components/layout/Layout";
-import RecordCard from "../../../components/records/RecordCard/RecordCard";
-import Button from "../../../components/ui/Button";
-import { swimmingAPI, communityAPI } from "../../../utils/api";
-import { useAuth } from "../../../contexts/AuthContext";
-import { SwimmingRecord } from "../../../types";
+import Layout from "@/components/layout/Layout";
+import RecordCard from "@/components/records/RecordCard/RecordCard";
+import Button from "@/components/ui/Button";
+import { swimmingAPI, communityAPI } from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { SwimmingRecord } from "@/types";
 import styles from "./page.module.scss";
 
 export default function RecordDetailPage() {
@@ -27,12 +27,12 @@ export default function RecordDetailPage() {
       console.log("현재 사용자:", user);
       console.log("액세스 토큰:", localStorage.getItem("access_token"));
 
-      fetchRecord(params.id as string);
-      checkSharedStatus(params.id as string);
+      fetchRecord(Number(params.id));
+      checkSharedStatus(Number(params.id));
     }
   }, [params.id]);
 
-  const fetchRecord = async (id: string) => {
+  const fetchRecord = async (id: number) => {
     try {
       setLoading(true);
       setError(null);
@@ -47,7 +47,7 @@ export default function RecordDetailPage() {
   };
 
   // 이 수영 기록이 커뮤니티에 공유되었는지 확인
-  const checkSharedStatus = async (recordId: string) => {
+  const checkSharedStatus = async (recordId: number) => {
     try {
       console.log(`공유 상태 확인 중... 기록 ID: ${recordId}`);
       const response = await communityAPI.getSwimmingRecordShareStatus(
@@ -67,59 +67,39 @@ export default function RecordDetailPage() {
     }
   };
 
-  // 커뮤니티에 공유하기
-  const handleShareToCommunity = async () => {
-    if (!record) return;
-
+  const handleShareRecord = async () => {
     try {
-      setIsSharing(true);
+      // 수영 기록 공유 기능은 백엔드에서 아직 구현되지 않았으므로 임시로 alert만 표시
+      alert("수영 기록 공유 기능은 준비 중입니다.");
 
-      // 수영 기록을 커뮤니티에 연동하여 게시물 생성
-      const response = await communityAPI.createSwimmingRecordPost(
-        record.id.toString(),
-        `${record.title} - 수영 기록을 공유합니다.`
-      );
+      // TODO: 백엔드 구현 후 아래 코드 활성화
+      // const response = await postsAPI.createPost({
+      //   title: `${record.stroke} ${record.distance}m 기록 공유`,
+      //   content: `수영 기록을 공유합니다!`,
+      //   category: "기록 공유",
+      //   swimmingRecordId: record.id.toString(),
+      // });
 
-      // 성공 시 공유 상태 업데이트
-      setIsShared(true);
-      setSharedPostId(response.data.id);
-
-      alert("수영 기록이 커뮤니티에 성공적으로 공유되었습니다!");
-
-      // 공유 상태 다시 확인
-      await checkSharedStatus(record.id.toString());
-    } catch (error: any) {
-      console.error("커뮤니티 공유 실패:", error);
-      alert("커뮤니티 공유에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setIsSharing(false);
+      // alert("기록이 성공적으로 공유되었습니다!");
+      // router.push("/community");
+    } catch (error) {
+      console.error("기록 공유 실패:", error);
+      alert("기록 공유에 실패했습니다.");
     }
   };
 
-  // 공유 취소하기
-  const handleUnshareFromCommunity = async () => {
-    if (!sharedPostId) return;
-
-    if (!confirm("정말로 이 수영 기록의 공유를 취소하시겠습니까?")) {
-      return;
-    }
-
+  const handleUnshareRecord = async () => {
     try {
-      setIsUnsharing(true);
+      // 수영 기록 공유 해제 기능은 백엔드에서 아직 구현되지 않았으므로 임시로 alert만 표시
+      alert("수영 기록 공유 해제 기능은 준비 중입니다.");
 
-      // 공유된 게시물 삭제
-      await communityAPI.deletePost(sharedPostId);
-
-      // 성공 시 공유 상태 업데이트
-      setIsShared(false);
-      setSharedPostId(null);
-
-      alert("수영 기록 공유가 취소되었습니다.");
-    } catch (error: any) {
-      console.error("공유 취소 실패:", error);
-      alert("공유 취소에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setIsUnsharing(false);
+      // TODO: 백엔드 구현 후 아래 코드 활성화
+      // await postsAPI.deletePost(sharedPostId);
+      // alert("기록 공유가 해제되었습니다.");
+      // setSharedPostId(undefined);
+    } catch (error) {
+      console.error("기록 공유 해제 실패:", error);
+      alert("기록 공유 해제에 실패했습니다.");
     }
   };
 
@@ -170,7 +150,7 @@ export default function RecordDetailPage() {
               <div className={styles.shareStatus}>
                 {!isShared ? (
                   <button
-                    onClick={handleShareToCommunity}
+                    onClick={handleShareRecord}
                     disabled={isSharing}
                     className={styles.shareButton}
                   >
@@ -178,9 +158,11 @@ export default function RecordDetailPage() {
                   </button>
                 ) : (
                   <div className={styles.sharedStatus}>
-                    <span className={styles.sharedText}>✓ 커뮤니티에 공유됨</span>
+                    <span className={styles.sharedText}>
+                      ✓ 커뮤니티에 공유됨
+                    </span>
                     <button
-                      onClick={handleUnshareFromCommunity}
+                      onClick={handleUnshareRecord}
                       disabled={isUnsharing}
                       className={styles.unshareButton}
                     >

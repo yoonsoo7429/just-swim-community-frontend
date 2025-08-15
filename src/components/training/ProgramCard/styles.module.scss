@@ -184,7 +184,7 @@
 
 .statsCompact {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-bottom: 12px;
 }
@@ -271,7 +271,81 @@
 
 .actionsCompact {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.participationActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.joinButton {
+  flex: 1;
+  padding: 8px 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.leaveButton {
+  flex: 1;
+  padding: 8px 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+  }
+}
+
+.shareButton {
+  width: 100%;
+  padding: 8px 16px;
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover:not(:disabled) {
+    background: #7c3aed;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
 }
 
 .viewDetailsButton {
@@ -290,6 +364,14 @@
     background: #2563eb;
     transform: translateY(-1px);
   }
+}
+
+.maxParticipantsCompact {
+  padding: 2px 6px;
+  background: #fef3c7;
+  color: #d97706;
+  border-radius: 4px;
+  font-weight: 500;
 }
 
 // 컴팩트 모드 반응형 디자인
@@ -363,6 +445,10 @@
 
   .difficultyCompact {
     align-self: flex-start;
+  }
+
+  .participationActions {
+    flex-direction: column;
   }
 }
 

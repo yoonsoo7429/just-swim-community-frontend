@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./styles.module.scss";
-import { SwimmingRecord } from "../../../types";
-import { useAuth } from "../../../contexts/AuthContext";
+import { SwimmingRecord } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface RecordCardProps {
   record: SwimmingRecord;

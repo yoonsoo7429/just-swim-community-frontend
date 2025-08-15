@@ -1,0 +1,235 @@
+.container {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  .userInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .author {
+      font-weight: 600;
+      color: #333;
+      font-size: 1rem;
+    }
+
+    .myReviewBadge {
+      background: #2196f3;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+  }
+
+  .date {
+    color: #666;
+    font-size: 0.8rem;
+  }
+}
+
+.rating {
+  margin-bottom: 16px;
+
+  .overallRating {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    .ratingLabel {
+      color: #666;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .stars {
+      display: flex;
+      gap: 2px;
+    }
+
+    .ratingValue {
+      color: #333;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  }
+
+  .categoryRatings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+
+    .categoryRating {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 6px;
+
+      .categoryName {
+        color: #666;
+        font-size: 0.8rem;
+        font-weight: 500;
+        min-width: 50px;
+      }
+
+      .categoryStars {
+        display: flex;
+        gap: 1px;
+      }
+
+      .categoryValue {
+        color: #333;
+        font-weight: 600;
+        font-size: 0.8rem;
+        min-width: 25px;
+      }
+    }
+  }
+}
+
+.stars {
+  .star {
+    font-size: 1.2rem;
+    cursor: default;
+
+    &.filled {
+      color: #ffd700;
+    }
+
+    &.empty {
+      color: #e0e0e0;
+    }
+  }
+}
+
+.reviewContent {
+  .reviewText {
+    color: #333;
+    line-height: 1.6;
+    margin: 0 0 12px 0;
+    white-space: pre-wrap;
+  }
+
+  .expandButton {
+    background: none;
+    border: none;
+    color: #2196f3;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0;
+    text-decoration: underline;
+
+    &:hover {
+      color: #1976d2;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+
+  button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .editButton {
+    background: #ff9800;
+    color: white;
+
+    &:hover {
+      background: #f57c00;
+    }
+  }
+
+  .deleteButton {
+    background: #f44336;
+    color: white;
+
+    &:hover {
+      background: #d32f2f;
+    }
+  }
+}
+
+// 반응형 디자인
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .userInfo {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+
+  .rating {
+    .overallRating {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .categoryRatings {
+      grid-template-columns: 1fr;
+      gap: 6px;
+
+      .categoryRating {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 12px;
+
+        .categoryName {
+          min-width: auto;
+        }
+
+        .categoryValue {
+          min-width: auto;
+        }
+      }
+    }
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 6px;
+
+    button {
+      width: 100%;
+      padding: 8px 12px;
+    }
+  }
+}
