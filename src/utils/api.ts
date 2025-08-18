@@ -167,6 +167,8 @@ export const communityAPI = {
     apiClient.get(`/posts/swimming-record/${recordId}/status`),
   getTrainingProgramShareStatus: (programId: number) =>
     apiClient.get(`/posts/training-program/${programId}/status`),
+  // 게시물 삭제 메서드 추가
+  deletePost: (postId: number) => apiClient.delete(`/posts/${postId}`),
 };
 
 // Training Progress API - 백엔드에 구현됨

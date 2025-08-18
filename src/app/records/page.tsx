@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import RecordForm from "@/components/records/RecordForm/RecordForm";
 import RecordCard from "@/components/records/RecordCard/RecordCard";
+import ShareRecordModal from "@/components/records/ShareRecordModal";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { swimmingAPI, communityAPI } from "@/utils/api";
@@ -16,13 +17,17 @@ import styles from "./page.module.scss";
 
 interface RecordWithShareStatus extends SwimmingRecord {
   isShared?: boolean;
-  sharedPostId?: number;
+  sharedPostId: number | null;
 }
 
 export default function RecordsPage() {
   const router = useRouter();
   const { user, signIn, signUp } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<SwimmingRecord | null>(
+    null
+  );
   const [records, setRecords] = useState<RecordWithShareStatus[]>([]);
   const [filter, setFilter] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -103,24 +108,28 @@ export default function RecordsPage() {
     }
   };
 
-  const handleShareRecord = async (record: SwimmingRecord) => {
-    try {
-      // 수영 기록 공유 기능은 백엔드에서 아직 구현되지 않았으므로 임시로 alert만 표시
-      alert("수영 기록 공유 기능은 준비 중입니다.");
+  const handleShareRecord = (record: SwimmingRecord) => {
+    setSelectedRecord(record);
+    setIsShareModalOpen(true);
+  };
 
-      // TODO: 백엔드 구현 후 아래 코드 활성화
-      // const response = await postsAPI.createPost({
-      //   title: `${record.stroke} ${record.distance}m 기록 공유`,
-      //   content: `수영 기록을 공유합니다!`,
-      //   category: "기록 공유",
-      //   swimmingRecordId: record.id.toString(),
-      // });
+  const handleShareSuccess = (postId: number) => {
+    if (selectedRecord) {
+      // 해당 기록의 공유 상태를 업데이트
+      setRecords((prevRecords) =>
+        prevRecords.map((record) =>
+          record.id === selectedRecord.id
+            ? { ...record, isShared: true, sharedPostId: postId }
+            : record
+        )
+      );
 
-      // alert("기록이 성공적으로 공유되었습니다!");
-      // fetchRecords(); // 목록 새로고침
-    } catch (error) {
-      console.error("기록 공유 실패:", error);
-      alert("기록 공유에 실패했습니다.");
+      alert("기록이 성공적으로 커뮤니티에 공유되었습니다!");
+
+      // 커뮤니티 페이지로 이동할지 확인
+      if (confirm("공유된 게시글을 확인하시겠습니까?")) {
+        router.push(`/community`);
+      }
     }
   };
 
@@ -283,6 +292,7 @@ export default function RecordsPage() {
                   viewMode="compact"
                   isShared={record.isShared}
                   sharedPostId={record.sharedPostId}
+                  onShare={() => handleShareRecord(record)}
                 />
               ))}
             </div>
@@ -303,6 +313,18 @@ export default function RecordsPage() {
             <div className={styles.submitting}>기록을 등록하는 중...</div>
           )}
         </Modal>
+
+        {selectedRecord && (
+          <ShareRecordModal
+            isOpen={isShareModalOpen}
+            onClose={() => {
+              setIsShareModalOpen(false);
+              setSelectedRecord(null);
+            }}
+            record={selectedRecord}
+            onShareSuccess={handleShareSuccess}
+          />
+        )}
       </div>
     </Layout>
   );

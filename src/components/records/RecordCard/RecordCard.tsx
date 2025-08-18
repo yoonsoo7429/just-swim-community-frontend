@@ -10,7 +10,8 @@ interface RecordCardProps {
   record: SwimmingRecord;
   viewMode?: "compact" | "detailed";
   isShared?: boolean;
-  sharedPostId?: number;
+  sharedPostId: number | null;
+  onShare?: () => void;
 }
 
 const RecordCard: React.FC<RecordCardProps> = ({
@@ -18,6 +19,7 @@ const RecordCard: React.FC<RecordCardProps> = ({
   viewMode = "compact",
   isShared = false,
   sharedPostId,
+  onShare,
 }) => {
   const { user } = useAuth();
   const router = useRouter();
@@ -44,12 +46,33 @@ const RecordCard: React.FC<RecordCardProps> = ({
   };
 
   const formatDuration = (duration: number): string => {
-    const hours = Math.floor(duration / 60);
-    const minutes = duration % 60;
-    if (hours > 0) {
-      return `${hours}:${String(minutes).padStart(2, "0")}`;
+    // duration이 1000 이상이면 초 단위, 그렇지 않으면 분 단위로 가정
+    if (duration >= 1000) {
+      // 초 단위로 저장된 경우
+      const hours = Math.floor(duration / 3600);
+      const minutes = Math.floor((duration % 3600) / 60);
+      const seconds = duration % 60;
+
+      if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, "0")}:${String(
+          seconds
+        ).padStart(2, "0")}`;
+      } else if (minutes > 0) {
+        return `${minutes}:${String(seconds).padStart(2, "0")}`;
+      } else {
+        return `${seconds}초`;
+      }
+    } else {
+      // 분 단위로 저장된 경우
+      const hours = Math.floor(duration / 60);
+      const minutes = duration % 60;
+
+      if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, "0")}`;
+      } else {
+        return `${minutes}:00`;
+      }
     }
-    return `${minutes}:00`;
   };
 
   const handleCardClick = () => {
@@ -61,6 +84,20 @@ const RecordCard: React.FC<RecordCardProps> = ({
   const handleExpandClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsExpanded(!isExpanded);
+  };
+
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onShare) {
+      onShare();
+    }
+  };
+
+  const handleViewSharedPost = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (sharedPostId) {
+      router.push(`/community/${sharedPostId}`);
+    }
   };
 
   // 컴팩트 모드 (전체 보기)
@@ -85,29 +122,31 @@ const RecordCard: React.FC<RecordCardProps> = ({
               </span>
             </div>
           </div>
-          <button
-            className={styles.expandButton}
-            onClick={handleExpandClick}
-            aria-label={isExpanded ? "접기" : "펼치기"}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              className={`${styles.expandIcon} ${
-                isExpanded ? styles.expanded : ""
-              }`}
+          <div className={styles.headerActions}>
+            <button
+              className={styles.expandButton}
+              onClick={handleExpandClick}
+              aria-label={isExpanded ? "접기" : "펼치기"}
             >
-              <path
-                d="M6 9l6 6 6-6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                className={`${styles.expandIcon} ${
+                  isExpanded ? styles.expanded : ""
+                }`}
+              >
+                <path
+                  d="M6 9l6 6 6-6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className={styles.titleCompact}>
@@ -116,24 +155,46 @@ const RecordCard: React.FC<RecordCardProps> = ({
             <div className={styles.shareStatusCompact}>
               <span className={styles.shareIcon}>🌐</span>
               <span className={styles.shareText}>커뮤니티에 공유됨</span>
+              {sharedPostId && (
+                <button
+                  onClick={handleViewSharedPost}
+                  className={styles.viewSharedButton}
+                  title="공유된 게시글 보기"
+                >
+                  보기
+                </button>
+              )}
             </div>
           )}
         </div>
 
         <div className={styles.statsCompact}>
           <div className={styles.statCompact}>
-            <span className={styles.valueCompact}>{record.totalDistance}m</span>
             <span className={styles.labelCompact}>거리</span>
+            <span className={styles.valueCompact}>{record.totalDistance}m</span>
           </div>
           <div className={styles.statCompact}>
+            <span className={styles.labelCompact}>시간</span>
             <span className={styles.valueCompact}>
               {formatDuration(record.totalDuration)}
             </span>
-            <span className={styles.labelCompact}>시간</span>
           </div>
           <div className={styles.statCompact}>
-            <span className={styles.valueCompact}>{record.poolLength}m</span>
             <span className={styles.labelCompact}>수영장</span>
+            <span className={styles.valueCompact}>
+              {record.poolName ? (
+                <div className={styles.poolInfoCompact}>
+                  <div className={styles.poolNameCompact}>
+                    {record.poolName}
+                  </div>
+                  <div className={styles.poolLengthCompact}>
+                    {record.poolLength}m
+                  </div>
+                </div>
+              ) : (
+                `${record.poolLength}m`
+              )}
+            </span>
           </div>
           {record.calories && (
             <div className={styles.statCompact}>
@@ -168,6 +229,18 @@ const RecordCard: React.FC<RecordCardProps> = ({
                 <p>{record.description}</p>
               </div>
             )}
+
+            <div className={styles.actionsCompact}>
+              {!isShared && onShare && (
+                <button
+                  onClick={handleShareClick}
+                  className={styles.shareButtonCompact}
+                  title="커뮤니티에 공유하기"
+                >
+                  커뮤니티에 공유
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -213,7 +286,25 @@ const RecordCard: React.FC<RecordCardProps> = ({
           </div>
           <div className={styles.poolLength}>
             <span className={styles.label}>수영장</span>
-            <span className={styles.value}>{record.poolLength}m</span>
+            <span className={styles.value}>
+              {record.poolName ? (
+                <div className={styles.poolInfo}>
+                  <div className={styles.poolName}>{record.poolName}</div>
+                  <div className={styles.poolLength}>{record.poolLength}m</div>
+                  {record.poolType && (
+                    <div className={styles.poolType}>
+                      {record.poolType === "indoor"
+                        ? "실내"
+                        : record.poolType === "outdoor"
+                        ? "실외"
+                        : "혼합"}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                `${record.poolLength}m`
+              )}
+            </span>
           </div>
         </div>
 

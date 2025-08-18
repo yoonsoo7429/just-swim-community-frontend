@@ -91,6 +91,36 @@
   gap: 0.5rem;
 }
 
+.poolInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.poolName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.poolLength {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.poolType {
+  font-size: 0.75rem;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
 .value {
   font-size: 1.75rem;
   font-weight: 700;
@@ -614,6 +644,31 @@
   white-space: nowrap;
 }
 
+.poolInfoCompact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  text-align: center;
+}
+
+.poolNameCompact {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.poolLengthCompact {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
 .descriptionCompact {
   margin-bottom: 0.75rem;
   padding: 0.75rem;
@@ -665,6 +720,32 @@
 
   span {
     font-size: 0.75rem;
+  }
+}
+
+.shareButtonCompact {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+
+  &:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
@@ -778,14 +859,36 @@
 .shareStatusCompact {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  background: #f0f9ff;
-  border-radius: 6px;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: #e3f2fd;
+  border-radius: 4px;
   font-size: 0.75rem;
-  color: #0369a1;
-  font-weight: 500;
-  width: fit-content;
+  color: #1976d2;
+
+  .shareIcon {
+    font-size: 0.8rem;
+  }
+
+  .shareText {
+    font-weight: 500;
+  }
+
+  .viewSharedButton {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background: #1565c0;
+    }
+  }
 }
 
 .shareIcon {
@@ -794,4 +897,73 @@
 
 .shareText {
   font-size: 0.75rem;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardActions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sharedStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1976d2;
+  font-size: 0.9rem;
+
+  .sharedIcon {
+    font-size: 1rem;
+  }
+
+  .sharedText {
+    font-weight: 500;
+  }
+
+  .viewSharedButton {
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background: #1565c0;
+    }
+  }
+}
+
+.shareButton {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+  &:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 }

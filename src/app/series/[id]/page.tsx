@@ -7,6 +7,7 @@ import { trainingAPI } from "@/utils/api";
 import { TrainingSeries, TrainingMeeting } from "@/types";
 import { Button } from "@/components/ui";
 import styles from "./page.module.scss";
+import IconArrowLeft from "@assets/icon_arrow_left.svg";
 
 const SeriesDetailPage: React.FC = () => {
   const params = useParams();
@@ -150,7 +151,7 @@ const SeriesDetailPage: React.FC = () => {
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <button className={styles.backButton} onClick={() => router.back()}>
-            ← 뒤로가기
+            <IconArrowLeft width={20} height={20} />
           </button>
           <h1>{series.title}</h1>
         </div>

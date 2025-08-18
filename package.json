@@ -17,10 +17,12 @@
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
     "sass": "^1.89.2",
+    "webpack": "^5.101.2",
     "zod": "^4.0.14"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@svgr/webpack": "^8.1.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

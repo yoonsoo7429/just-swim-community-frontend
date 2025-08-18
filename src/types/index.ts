@@ -85,7 +85,9 @@ export interface SwimmingRecord {
   id: number;
   title: string;
   description?: string;
-  poolLength: 25 | 50; // 수영장 길이 (25m 또는 50m)
+  poolLength: number; // 수영장 길이 (미터)
+  poolName?: string; // 수영장 이름 (예: "올림픽공원 수영장", "잠실 실내수영장")
+  poolType?: "indoor" | "outdoor" | "mixed"; // 실내/실외/혼합
   sessionStartTime: string; // HH:MM 형식
   sessionEndTime: string; // HH:MM 형식
   strokes: StrokeRecord[]; // 여러 영법과 거리
