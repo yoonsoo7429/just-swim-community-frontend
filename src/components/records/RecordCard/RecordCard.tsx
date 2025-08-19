@@ -96,7 +96,7 @@ const RecordCard: React.FC<RecordCardProps> = ({
   const handleViewSharedPost = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (sharedPostId) {
-      router.push(`/community/${sharedPostId}`);
+      router.push(`/posts/${sharedPostId}`);
     }
   };
 
@@ -153,7 +153,6 @@ const RecordCard: React.FC<RecordCardProps> = ({
           <h3>{record.title}</h3>
           {isShared && (
             <div className={styles.shareStatusCompact}>
-              <span className={styles.shareIcon}>🌐</span>
               <span className={styles.shareText}>커뮤니티에 공유됨</span>
               {sharedPostId && (
                 <button

@@ -43,12 +43,30 @@ export default function PostCard({
   };
 
   const formatDuration = (duration: number): string => {
-    const hours = Math.floor(duration / 60);
-    const minutes = duration % 60;
-    if (hours > 0) {
-      return `${hours}:${String(minutes).padStart(2, "0")}`;
+    if (duration >= 1000) {
+      // 초 단위로 저장된 경우
+      const hours = Math.floor(duration / 3600);
+      const minutes = Math.floor((duration % 3600) / 60);
+      const seconds = duration % 60;
+
+      if (hours > 0) {
+        return `${hours}시간 ${minutes}분 ${seconds}초`;
+      } else if (minutes > 0) {
+        return `${minutes}분 ${seconds}초`;
+      } else {
+        return `${seconds}초`;
+      }
+    } else {
+      // 분 단위로 저장된 경우
+      const hours = Math.floor(duration / 60);
+      const minutes = duration % 60;
+
+      if (hours > 0) {
+        return `${hours}시간 ${minutes}분`;
+      } else {
+        return `${minutes}분`;
+      }
     }
-    return `${minutes}:00`;
   };
 
   const getStrokeName = (stroke: string) => {
@@ -101,7 +119,7 @@ export default function PostCard({
     }
 
     try {
-      await postsAPI.deletePost(post.id.toString());
+      await postsAPI.deletePost(post.id);
       if (onDelete) {
         onDelete(post.id);
       }
@@ -185,15 +203,23 @@ export default function PostCard({
           <div className={styles.recordHeader}>
             <span className={styles.recordLabel}>📊 수영 기록</span>
             <span className={styles.recordTime}>
-              {formatDuration(post.swimmingRecord.duration)}
+              {formatDuration(post.swimmingRecord.totalDuration || 0)}
             </span>
           </div>
           <div className={styles.recordDetails}>
             <span className={styles.recordStroke}>
-              {getStrokeName(post.swimmingRecord.stroke)}
+              {post.swimmingRecord.strokes &&
+              post.swimmingRecord.strokes.length > 0
+                ? post.swimmingRecord.strokes
+                    .map((stroke) => getStrokeName(stroke.style))
+                    .join(", ")
+                : getStrokeName(post.swimmingRecord.strokes[0]?.style)}
             </span>
             <span className={styles.recordDistance}>
-              {post.swimmingRecord.distance}m
+              {post.swimmingRecord.totalDistance
+                ? `${post.swimmingRecord.totalDistance}m`
+                : "거리 정보 없음"}
+              m
             </span>
           </div>
         </div>

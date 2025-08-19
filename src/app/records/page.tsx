@@ -45,8 +45,32 @@ export default function RecordsPage() {
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const response = await swimmingAPI.getRecords();
-      setRecords(response.data || []);
+      const response = await swimmingAPI.getMyRecords();
+      const recordsData = response.data || [];
+
+      // 각 기록의 공유 상태 확인
+      const recordsWithShareStatus = await Promise.all(
+        recordsData.map(async (record: any) => {
+          try {
+            const shareStatusResponse =
+              await communityAPI.getSwimmingRecordShareStatus(record.id);
+            return {
+              ...record,
+              isShared: shareStatusResponse.data?.isShared || false,
+              sharedPostId: shareStatusResponse.data?.postId || null,
+            };
+          } catch (error) {
+            console.error(`기록 ${record.id}의 공유 상태 확인 실패:`, error);
+            return {
+              ...record,
+              isShared: false,
+              sharedPostId: null,
+            };
+          }
+        })
+      );
+
+      setRecords(recordsWithShareStatus);
     } catch (error) {
       console.error("기록 조회 실패:", error);
       setError("기록을 불러오는데 실패했습니다.");
@@ -138,6 +162,8 @@ export default function RecordsPage() {
     if (filter === "all") return true;
     return record.strokes.some((stroke) => stroke.style === filter);
   });
+
+  console.log("Filtered Records:", filteredRecords);
 
   const styleLabels: { [key: string]: string } = {
     all: "전체",
