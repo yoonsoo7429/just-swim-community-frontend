@@ -7,7 +7,12 @@ import { TrainingProgram } from "@/types";
 import { trainingAPI } from "@/utils/api";
 import styles from "./page.module.scss";
 import Button from "@/components/ui/Button";
-import { CreateProgramModal, ProgramCard } from "@/components/training";
+import {
+  CreateProgramModal,
+  ProgramCard,
+  ShareProgramModal,
+} from "@/components/training";
+
 import { useAuth } from "@/contexts/AuthContext";
 import SignInButton from "@/components/auth/SignInButton";
 import SignUpButton from "@/components/auth/SignUpButton";
@@ -18,6 +23,10 @@ const ProgramsPage: React.FC = () => {
   const [myPrograms, setMyPrograms] = useState<TrainingProgram[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  const [selectedProgram, setSelectedProgram] =
+    useState<TrainingProgram | null>(null);
   const [filter, setFilter] = useState<
     "all" | "beginner" | "intermediate" | "advanced"
   >("all");
@@ -44,6 +53,16 @@ const ProgramsPage: React.FC = () => {
 
   const handleCreateSuccess = () => {
     fetchMyPrograms();
+  };
+
+  const handleShareSuccess = () => {
+    // 공유 성공 후 필요한 처리
+    alert("프로그램이 성공적으로 공유되었습니다!");
+  };
+
+  const handleRecruitmentSuccess = () => {
+    // 모집글 작성 성공 후 필요한 처리
+    alert("모집글이 성공적으로 작성되었습니다!");
   };
 
   const handleSignIn = async (email: string, password: string) => {
@@ -163,6 +182,13 @@ const ProgramsPage: React.FC = () => {
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onSuccess={handleCreateSuccess}
+        />
+
+        <ShareProgramModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          program={selectedProgram}
+          onSuccess={handleShareSuccess}
         />
       </div>
     </Layout>

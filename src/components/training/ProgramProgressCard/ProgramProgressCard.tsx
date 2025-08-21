@@ -21,6 +21,15 @@ const ProgramProgressCard: React.FC<ProgramProgressCardProps> = ({
   progress,
   onCompleteSession,
 }) => {
+  // 기본값 설정으로 안전성 확보
+  const safeProgress = {
+    completedSessions: progress?.completedSessions || 0,
+    totalSessions: progress?.totalSessions || 0,
+    progressPercentage: progress?.progressPercentage || 0,
+    status: progress?.status || "active",
+    startDate: progress?.startDate || "",
+    lastCompletedDate: progress?.lastCompletedDate || "",
+  };
   const getStatusText = (status: string) => {
     switch (status) {
       case "active":
@@ -54,6 +63,7 @@ const ProgramProgressCard: React.FC<ProgramProgressCardProps> = ({
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("ko-KR");
   };
+  console.log("Program Progress Card:", program, safeProgress);
 
   return (
     <div className={styles.container}>
@@ -61,25 +71,26 @@ const ProgramProgressCard: React.FC<ProgramProgressCardProps> = ({
         <h3>프로그램 진행률</h3>
         <span
           className={styles.status}
-          style={{ backgroundColor: getStatusColor(progress.status) }}
+          style={{ backgroundColor: getStatusColor(safeProgress.status) }}
         >
-          {getStatusText(progress.status)}
+          {getStatusText(safeProgress.status)}
         </span>
       </div>
 
       <div className={styles.progressBar}>
         <div className={styles.progressInfo}>
           <span className={styles.progressText}>
-            {progress.completedSessions} / {progress.totalSessions} 세션 완료
+            {safeProgress.completedSessions} / {safeProgress.totalSessions} 세션
+            완료
           </span>
           <span className={styles.percentage}>
-            {progress.progressPercentage.toFixed(1)}%
+            {safeProgress.progressPercentage.toFixed(1)}%
           </span>
         </div>
         <div className={styles.barContainer}>
           <div
             className={styles.progressFill}
-            style={{ width: `${progress.progressPercentage}%` }}
+            style={{ width: `${safeProgress.progressPercentage}%` }}
           />
         </div>
       </div>
@@ -88,40 +99,42 @@ const ProgramProgressCard: React.FC<ProgramProgressCardProps> = ({
         <div className={styles.statItem}>
           <span className={styles.label}>시작일</span>
           <span className={styles.value}>
-            {progress.startDate ? formatDate(progress.startDate) : "미정"}
+            {safeProgress.startDate
+              ? formatDate(safeProgress.startDate)
+              : "미정"}
           </span>
         </div>
         <div className={styles.statItem}>
           <span className={styles.label}>마지막 완료일</span>
           <span className={styles.value}>
-            {progress.lastCompletedDate
-              ? formatDate(progress.lastCompletedDate)
+            {safeProgress.lastCompletedDate
+              ? formatDate(safeProgress.lastCompletedDate)
               : "없음"}
           </span>
         </div>
         <div className={styles.statItem}>
           <span className={styles.label}>남은 세션</span>
           <span className={styles.value}>
-            {progress.totalSessions - progress.completedSessions}개
+            {safeProgress.totalSessions - safeProgress.completedSessions}개
           </span>
         </div>
       </div>
 
-      {progress.status === "active" && (
+      {safeProgress.status === "active" && (
         <div className={styles.actions}>
           <button className={styles.pauseButton}>일시정지</button>
           <button className={styles.abandonButton}>중단하기</button>
         </div>
       )}
 
-      {progress.status === "paused" && (
+      {safeProgress.status === "paused" && (
         <div className={styles.actions}>
           <button className={styles.resumeButton}>재개하기</button>
           <button className={styles.abandonButton}>중단하기</button>
         </div>
       )}
 
-      {progress.status === "completed" && (
+      {safeProgress.status === "completed" && (
         <div className={styles.completionMessage}>
           <p>🎉 축하합니다! 프로그램을 완료했습니다!</p>
           <button className={styles.reviewButton}>리뷰 작성하기</button>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PostCard from "@/components/community/PostCard";
 import CreatePostModal from "@/components/community/CreatePostModal";
+
 import Button from "@/components/ui/Button";
 import { Post, TrainingProgram } from "@/types";
 import { postsAPI, trainingAPI } from "@/utils/api";
@@ -17,6 +18,7 @@ const categories = [
   "팁 공유",
   "질문",
   "훈련 후기",
+  "훈련 모집",
   "챌린지",
   "가이드",
 ];
@@ -31,6 +33,7 @@ export default function CommunityPage() {
   );
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"posts" | "programs">("posts");
@@ -65,7 +68,6 @@ export default function CommunityPage() {
         );
       }
 
-      console.log("Fetched posts:", fetchedPosts);
       setPosts(fetchedPosts);
     } catch (error) {
       console.error("게시물을 불러오는데 실패했습니다:", error);
@@ -196,11 +198,15 @@ export default function CommunityPage() {
 
           <div className={styles.postsSection}>
             <div className={styles.postsHeader}>
-              <h2>게시물</h2>
-              {user && (
-                <Button onClick={() => setIsCreateModalOpen(true)}>
-                  새 게시물 작성
-                </Button>
+              <h2>
+                {selectedCategory === "훈련 모집" ? "훈련 모집" : "게시물"}
+              </h2>
+              {user && selectedCategory !== "훈련 모집" && (
+                <div className={styles.postActions}>
+                  <Button onClick={() => setIsCreateModalOpen(true)}>
+                    새 게시물 작성
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -210,8 +216,19 @@ export default function CommunityPage() {
               <div className={styles.error}>{error}</div>
             ) : posts.length === 0 ? (
               <div className={styles.emptyState}>
-                <p>게시물이 없습니다.</p>
-                {user && <p>첫 번째 게시물을 작성해보세요!</p>}
+                {selectedCategory === "훈련 모집" ? (
+                  <>
+                    <p>아직 훈련 모집글이 없습니다.</p>
+                    <p>
+                      훈련 프로그램을 게시하면 자동으로 모집글이 생성됩니다!
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>게시물이 없습니다.</p>
+                    {user && <p>첫 번째 게시물을 작성해보세요!</p>}
+                  </>
+                )}
               </div>
             ) : (
               <div className={styles.postsGrid}>

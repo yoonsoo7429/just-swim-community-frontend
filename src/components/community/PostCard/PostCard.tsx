@@ -225,6 +225,90 @@ export default function PostCard({
         </div>
       )}
 
+      {post.recruitmentInfo && (
+        <div className={styles.recruitmentPreview}>
+          <div className={styles.recruitmentHeader}>
+            <span className={styles.recruitmentLabel}>🏊‍♂️ 훈련 모집</span>
+            <span
+              className={`${styles.recruitmentStatus} ${
+                styles[post.recruitmentInfo.status || "open"]
+              }`}
+            >
+              {post.recruitmentInfo.status === "open"
+                ? "모집 중"
+                : post.recruitmentInfo.status === "full"
+                ? "모집 완료"
+                : "모집 종료"}
+            </span>
+          </div>
+          <div className={styles.recruitmentDetails}>
+            <div className={styles.recruitmentInfo}>
+              <span className={styles.recruitmentType}>
+                {post.recruitmentInfo.type === "regular"
+                  ? "정기 모임"
+                  : "단기 모임"}
+              </span>
+              {post.recruitmentInfo.location && (
+                <span className={styles.recruitmentLocation}>
+                  📍 {post.recruitmentInfo.location}
+                </span>
+              )}
+            </div>
+            {post.recruitmentInfo.type === "regular" &&
+              post.recruitmentInfo.meetingDays && (
+                <div className={styles.recruitmentSchedule}>
+                  <span className={styles.recruitmentDays}>
+                    📅{" "}
+                    {post.recruitmentInfo.meetingDays
+                      .map((day) => {
+                        const dayMap: { [key: string]: string } = {
+                          monday: "월",
+                          tuesday: "화",
+                          wednesday: "수",
+                          thursday: "목",
+                          friday: "금",
+                          saturday: "토",
+                          sunday: "일",
+                        };
+                        return dayMap[day] || day;
+                      })
+                      .join(", ")}
+                  </span>
+                  {post.recruitmentInfo.meetingTime && (
+                    <span className={styles.recruitmentTime}>
+                      🕐 {post.recruitmentInfo.meetingTime}
+                    </span>
+                  )}
+                </div>
+              )}
+            {post.recruitmentInfo.type === "one-time" &&
+              post.recruitmentInfo.meetingDateTime && (
+                <div className={styles.recruitmentSchedule}>
+                  <span className={styles.recruitmentDateTime}>
+                    📅{" "}
+                    {new Date(
+                      post.recruitmentInfo.meetingDateTime
+                    ).toLocaleDateString("ko-KR")}
+                    🕐{" "}
+                    {new Date(
+                      post.recruitmentInfo.meetingDateTime
+                    ).toLocaleTimeString("ko-KR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              )}
+            <div className={styles.recruitmentParticipants}>
+              <span className={styles.participantsCount}>
+                👥 {post.recruitmentInfo.currentParticipants || 0} /{" "}
+                {post.recruitmentInfo.maxParticipants || 0}명
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={styles.postFooter}>
         <div className={styles.engagement}>
           <button

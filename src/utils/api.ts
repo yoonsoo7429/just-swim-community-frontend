@@ -16,6 +16,15 @@ export const trainingAPI = {
   getProgramParticipants: (id: number) =>
     apiClient.get(`/training/programs/${id}/participants`),
 
+  // 커뮤니티 공유 관련 APIs
+  shareToCommunity: (id: number, data: any) =>
+    apiClient.post(`/training/programs/${id}/share`, data),
+  getCommunityTemplates: () =>
+    apiClient.get("/training/programs/community/templates"),
+  getSharedPrograms: () => apiClient.get("/training/programs/community/shared"),
+  duplicateProgram: (id: number) =>
+    apiClient.post(`/training/programs/${id}/duplicate`),
+
   // Training Session APIs
   createSession: (data: any) => apiClient.post("/training/sessions", data),
   getSessionsByProgram: (programId: number) =>
@@ -169,6 +178,15 @@ export const communityAPI = {
     apiClient.get(`/posts/training-program/${programId}/status`),
   // 게시물 삭제 메서드 추가
   deletePost: (postId: number) => apiClient.delete(`/posts/${postId}`),
+
+  // 훈련 모집 관련 메서드 추가
+
+  getTrainingRecruitmentPosts: () =>
+    apiClient.get("/posts/training-recruitment"),
+  joinTrainingRecruitment: (postId: number) =>
+    apiClient.post(`/posts/${postId}/join-training`),
+  leaveTrainingRecruitment: (postId: number) =>
+    apiClient.delete(`/posts/${postId}/leave-training`),
 };
 
 // Training Progress API - 백엔드에 구현됨

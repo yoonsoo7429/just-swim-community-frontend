@@ -294,6 +294,17 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
+
+    .postActions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+    }
   }
 
   .emptyState {

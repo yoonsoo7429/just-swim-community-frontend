@@ -39,8 +39,36 @@ export interface Post {
     id: number;
     title: string;
     difficulty: string;
-    totalWeeks: number;
-    sessionsPerWeek: number;
+    description?: string;
+    visibility?: string;
+    isPublished?: boolean;
+  };
+  // 훈련 모집 관련 정보 (category가 '훈련 모집'일 때만)
+  recruitmentInfo?: {
+    // 기본 모집 정보
+    maxParticipants: number;
+    currentParticipants: number;
+    recruitmentDeadline?: string;
+    status: "open" | "full" | "closed";
+
+    // 훈련 일정 정보
+    trainingType: "regular" | "one-time";
+    meetingDays?: string[]; // ['monday', 'wednesday', 'friday']
+    meetingTime?: string; // "19:00"
+    startDate?: string;
+    endDate?: string;
+
+    // 장소 및 연락처
+    location: string;
+    contactInfo?: string;
+
+    // 추가 요구사항
+    requirements?: string;
+    equipment?: string;
+    cost?: string;
+
+    // 특별 안내
+    specialNotes?: string;
   };
 }
 
@@ -49,6 +77,7 @@ export type PostCategory =
   | "팁 공유"
   | "질문"
   | "훈련 후기"
+  | "훈련 모집"
   | "챌린지"
   | "가이드";
 
@@ -126,22 +155,9 @@ export interface TrainingProgram {
   title: string;
   description?: string;
   difficulty: "beginner" | "intermediate" | "advanced";
-  type: "regular" | "short-term"; // 정기 훈련 | 단기 훈련
-  // 정기 훈련용 필드들
-  totalWeeks?: number; // 총 주차 (정기 훈련일 때만)
-  sessionsPerWeek?: number; // 주당 세션 수 (정기 훈련일 때만)
-  // 단기 훈련용 필드들
-  totalSessions?: number; // 총 세션 수 (단기 훈련일 때만)
-  estimatedDuration?: number; // 예상 소요 시간 (분, 단기 훈련일 때만)
-  // 공통 필드들
   visibility: "public" | "private";
   isPublished: boolean;
-  participantsCount: number;
-  maxParticipants?: number;
-  isParticipating?: boolean;
-  userId: number;
-  user?: User;
-  sessions?: TrainingSession[];
+  user: User;
   createdAt: string;
   updatedAt: string;
 }
@@ -185,16 +201,8 @@ export interface CreateTrainingProgramDto {
   title: string;
   description?: string;
   difficulty: "beginner" | "intermediate" | "advanced";
-  type: "regular" | "short-term";
-  // 정기 훈련일 때
-  totalWeeks?: number;
-  sessionsPerWeek?: number;
-  // 단기 훈련일 때
-  totalSessions?: number;
-  estimatedDuration?: number;
   visibility: "public" | "private";
   isPublished?: boolean;
-  maxParticipants?: number;
 }
 
 export interface CreateTrainingSessionDto {

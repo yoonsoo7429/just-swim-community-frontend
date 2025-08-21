@@ -303,6 +303,124 @@
   border: 1px solid #e5e7eb;
 }
 
+// 훈련 모집 관련 스타일
+.recruitmentPreview {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e0f2fe;
+    border-color: #7dd3fc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.recruitmentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.recruitmentLabel {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0369a1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recruitmentStatus {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+
+  &.open {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &.full {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  &.closed {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
+
+.recruitmentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recruitmentInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.recruitmentType {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.recruitmentLocation {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.recruitmentSchedule {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recruitmentDays,
+.recruitmentTime,
+.recruitmentDateTime {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.recruitmentParticipants {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.participantsCount {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid #fbbf24;
+}
+
 // 반응형 디자인
 @media (max-width: 768px) {
   .postCard {
