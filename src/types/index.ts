@@ -16,59 +16,28 @@ export interface Post {
   id: number;
   title: string;
   content: string;
+  category: string;
   author: User;
-  category: PostCategory;
   likes: number;
   comments: number;
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
-  tags?: string[];
   isLiked?: boolean;
-  // 수영 기록 연동 정보
-  swimmingRecord?: {
-    id: number;
-    title: string;
-    totalDistance: number;
-    totalDuration: number;
-    poolLength: number;
-    strokes: StrokeRecord[];
-    calories?: number;
-  };
-  // 훈련 프로그램 연동 정보
-  trainingProgram?: {
-    id: number;
-    title: string;
-    difficulty: string;
-    description?: string;
-    visibility?: string;
-    isPublished?: boolean;
-  };
-  // 훈련 모집 관련 정보 (category가 '훈련 모집'일 때만)
+  isParticipating?: boolean; // 훈련 참여 상태 추가
+  likedBy?: User[]; // 좋아요한 사용자들
+  participants?: User[]; // 훈련 참여자들
+  swimmingRecord?: SwimmingRecord;
+  trainingProgram?: TrainingProgram;
   recruitmentInfo?: {
-    // 기본 모집 정보
+    type: string;
+    meetingDays: string[];
+    meetingTime: string;
+    meetingDateTime?: string;
+    location: string;
     maxParticipants: number;
     currentParticipants: number;
-    recruitmentDeadline?: string;
-    status: "open" | "full" | "closed";
-
-    // 훈련 일정 정보
-    trainingType: "regular" | "one-time";
-    meetingDays?: string[]; // ['monday', 'wednesday', 'friday']
-    meetingTime?: string; // "19:00"
-    startDate?: string;
-    endDate?: string;
-
-    // 장소 및 연락처
-    location: string;
-    contactInfo?: string;
-
-    // 추가 요구사항
-    requirements?: string;
-    equipment?: string;
-    cost?: string;
-
-    // 특별 안내
-    specialNotes?: string;
+    status: string;
   };
 }
 

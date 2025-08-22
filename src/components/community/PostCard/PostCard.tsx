@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Post } from "@/types";
-import { postsAPI } from "@/utils/api";
+import { communityAPI } from "@/utils/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLikedPosts } from "@/hooks/useLikedPosts";
 import { useRouter } from "next/navigation";
@@ -23,8 +23,18 @@ export default function PostCard({
   const { isLiked, setLiked } = useLikedPosts();
   const router = useRouter();
 
+  // 로컬 상태로 Post 데이터 관리
+  const [localPost, setLocalPost] = useState<Post>(post);
+
+  // post prop이 변경될 때 localPost 업데이트
+  useEffect(() => {
+    setLocalPost(post);
+  }, [post]);
+
   // 현재 사용자가 게시물 작성자인지 확인
-  const isOwnPost = Boolean(user && post.author && user.id === post.author.id);
+  const isOwnPost = Boolean(
+    user && localPost.author && user.id === localPost.author.id
+  );
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -90,8 +100,8 @@ export default function PostCard({
 
     try {
       // 좋아요 기능은 백엔드에서 아직 구현되지 않았으므로 임시로 로컬 상태만 업데이트
-      const updatedPost = { ...post, isLiked: !isLiked(post.id) };
-      setLiked(post.id, updatedPost.isLiked);
+      const updatedPost = { ...localPost, isLiked: !isLiked(localPost.id) };
+      setLiked(localPost.id, updatedPost.isLiked);
 
       if (onLikeUpdate) {
         onLikeUpdate(updatedPost);
@@ -104,8 +114,8 @@ export default function PostCard({
 
   const handleRecordClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (post.swimmingRecord) {
-      router.push(`/records/${post.swimmingRecord.id}`);
+    if (localPost.swimmingRecord) {
+      router.push(`/records/${localPost.swimmingRecord.id}`);
     }
   };
 
@@ -119,9 +129,9 @@ export default function PostCard({
     }
 
     try {
-      await postsAPI.deletePost(post.id);
+      await communityAPI.deletePost(localPost.id);
       if (onDelete) {
-        onDelete(post.id);
+        onDelete(localPost.id);
       }
     } catch (error) {
       console.error("게시물 삭제 실패:", error);
@@ -131,14 +141,50 @@ export default function PostCard({
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/posts/${post.id}/edit`);
+    router.push(`/posts/${localPost.id}/edit`);
   };
 
   const handlePostClick = () => {
     if (onClick) {
       onClick();
     } else {
-      router.push(`/posts/${post.id}`);
+      router.push(`/posts/${localPost.id}`);
+    }
+  };
+
+  const handleJoinTraining = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      await communityAPI.joinTrainingRecruitment(localPost.id);
+
+      // 참여 성공 시 로컬 상태 업데이트 (페이지 새로고침 없이)
+      const updatedPost = {
+        ...localPost,
+        isParticipating: true,
+        participants: [...(localPost.participants || []), user],
+        recruitmentInfo: {
+          ...localPost.recruitmentInfo!,
+          currentParticipants:
+            (localPost.recruitmentInfo?.currentParticipants || 0) + 1,
+        },
+      };
+
+      // 먼저 로컬 상태 업데이트
+      setLocalPost(updatedPost);
+
+      // 그 다음 부모 컴포넌트에 상태 업데이트 알림
+      if (onLikeUpdate) {
+        onLikeUpdate(updatedPost);
+      }
+    } catch (error) {
+      console.error("훈련 참여 실패:", error);
+      alert("훈련 참여에 실패했습니다.");
     }
   };
 
@@ -147,24 +193,24 @@ export default function PostCard({
       <div className={styles.postHeader}>
         <div className={styles.authorInfo}>
           <div className={styles.avatar}>
-            {post.author?.profileImage ? (
+            {localPost.author?.profileImage ? (
               <img
-                src={post.author.profileImage}
-                alt={post.author.name}
+                src={localPost.author.profileImage}
+                alt={localPost.author.name}
                 className={styles.avatarImage}
               />
             ) : (
               <div className={styles.avatarPlaceholder}>
-                {post.author?.name?.charAt(0) || "?"}
+                {localPost.author?.name?.charAt(0) || "?"}
               </div>
             )}
           </div>
           <div className={styles.authorDetails}>
             <span className={styles.authorName}>
-              {post.author?.name || "익명"}
+              {localPost.author?.name || "익명"}
             </span>
             <span className={styles.postTime}>
-              {formatTime(post.createdAt)}
+              {formatTime(localPost.createdAt)}
             </span>
           </div>
         </div>
@@ -190,34 +236,34 @@ export default function PostCard({
       </div>
 
       <div className={styles.postContent}>
-        <h3 className={styles.postTitle}>{post.title}</h3>
-        <p className={styles.postText}>{post.content}</p>
+        <h3 className={styles.postTitle}>{localPost.title}</h3>
+        <p className={styles.postText}>{localPost.content}</p>
 
-        {post.category && (
-          <span className={styles.postCategory}>{post.category}</span>
+        {localPost.category && (
+          <span className={styles.postCategory}>{localPost.category}</span>
         )}
       </div>
 
-      {post.swimmingRecord && (
+      {localPost.swimmingRecord && (
         <div className={styles.recordPreview} onClick={handleRecordClick}>
           <div className={styles.recordHeader}>
             <span className={styles.recordLabel}>📊 수영 기록</span>
             <span className={styles.recordTime}>
-              {formatDuration(post.swimmingRecord.totalDuration || 0)}
+              {formatDuration(localPost.swimmingRecord.totalDuration || 0)}
             </span>
           </div>
           <div className={styles.recordDetails}>
             <span className={styles.recordStroke}>
-              {post.swimmingRecord.strokes &&
-              post.swimmingRecord.strokes.length > 0
-                ? post.swimmingRecord.strokes
+              {localPost.swimmingRecord.strokes &&
+              localPost.swimmingRecord.strokes.length > 0
+                ? localPost.swimmingRecord.strokes
                     .map((stroke) => getStrokeName(stroke.style))
                     .join(", ")
-                : getStrokeName(post.swimmingRecord.strokes[0]?.style)}
+                : getStrokeName(localPost.swimmingRecord.strokes[0]?.style)}
             </span>
             <span className={styles.recordDistance}>
-              {post.swimmingRecord.totalDistance
-                ? `${post.swimmingRecord.totalDistance}m`
+              {localPost.swimmingRecord.totalDistance
+                ? `${localPost.swimmingRecord.totalDistance}m`
                 : "거리 정보 없음"}
               m
             </span>
@@ -225,18 +271,18 @@ export default function PostCard({
         </div>
       )}
 
-      {post.recruitmentInfo && (
+      {localPost.recruitmentInfo && (
         <div className={styles.recruitmentPreview}>
           <div className={styles.recruitmentHeader}>
             <span className={styles.recruitmentLabel}>🏊‍♂️ 훈련 모집</span>
             <span
               className={`${styles.recruitmentStatus} ${
-                styles[post.recruitmentInfo.status || "open"]
+                styles[localPost.recruitmentInfo.status || "open"]
               }`}
             >
-              {post.recruitmentInfo.status === "open"
+              {localPost.recruitmentInfo.status === "open"
                 ? "모집 중"
-                : post.recruitmentInfo.status === "full"
+                : localPost.recruitmentInfo.status === "full"
                 ? "모집 완료"
                 : "모집 종료"}
             </span>
@@ -244,22 +290,22 @@ export default function PostCard({
           <div className={styles.recruitmentDetails}>
             <div className={styles.recruitmentInfo}>
               <span className={styles.recruitmentType}>
-                {post.recruitmentInfo.type === "regular"
+                {localPost.recruitmentInfo.type === "regular"
                   ? "정기 모임"
                   : "단기 모임"}
               </span>
-              {post.recruitmentInfo.location && (
+              {localPost.recruitmentInfo.location && (
                 <span className={styles.recruitmentLocation}>
-                  📍 {post.recruitmentInfo.location}
+                  📍 {localPost.recruitmentInfo.location}
                 </span>
               )}
             </div>
-            {post.recruitmentInfo.type === "regular" &&
-              post.recruitmentInfo.meetingDays && (
+            {localPost.recruitmentInfo.type === "regular" &&
+              localPost.recruitmentInfo.meetingDays && (
                 <div className={styles.recruitmentSchedule}>
                   <span className={styles.recruitmentDays}>
                     📅{" "}
-                    {post.recruitmentInfo.meetingDays
+                    {localPost.recruitmentInfo.meetingDays
                       .map((day) => {
                         const dayMap: { [key: string]: string } = {
                           monday: "월",
@@ -274,24 +320,24 @@ export default function PostCard({
                       })
                       .join(", ")}
                   </span>
-                  {post.recruitmentInfo.meetingTime && (
+                  {localPost.recruitmentInfo.meetingTime && (
                     <span className={styles.recruitmentTime}>
-                      🕐 {post.recruitmentInfo.meetingTime}
+                      🕐 {localPost.recruitmentInfo.meetingTime}
                     </span>
                   )}
                 </div>
               )}
-            {post.recruitmentInfo.type === "one-time" &&
-              post.recruitmentInfo.meetingDateTime && (
+            {localPost.recruitmentInfo.type === "one-time" &&
+              localPost.recruitmentInfo.meetingDateTime && (
                 <div className={styles.recruitmentSchedule}>
                   <span className={styles.recruitmentDateTime}>
                     📅{" "}
                     {new Date(
-                      post.recruitmentInfo.meetingDateTime
+                      localPost.recruitmentInfo.meetingDateTime
                     ).toLocaleDateString("ko-KR")}
                     🕐{" "}
                     {new Date(
-                      post.recruitmentInfo.meetingDateTime
+                      localPost.recruitmentInfo.meetingDateTime
                     ).toLocaleTimeString("ko-KR", {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -301,10 +347,42 @@ export default function PostCard({
               )}
             <div className={styles.recruitmentParticipants}>
               <span className={styles.participantsCount}>
-                👥 {post.recruitmentInfo.currentParticipants || 0} /{" "}
-                {post.recruitmentInfo.maxParticipants || 0}명
+                👥 {localPost.recruitmentInfo.currentParticipants || 0} /{" "}
+                {localPost.recruitmentInfo.maxParticipants || 0}명
               </span>
             </div>
+
+            {/* 참여 버튼 추가 */}
+            {localPost.recruitmentInfo.status === "open" &&
+              user &&
+              !isOwnPost && (
+                <div className={styles.recruitmentActions}>
+                  {/* 현재 사용자가 이미 참여 중인지 확인 (participants 배열 직접 확인) */}
+                  {localPost.participants?.some(
+                    (participant) => participant.id === user.id
+                  ) ? (
+                    // 이미 참여 중인 경우
+                    <div className={styles.participationStatus}>
+                      <span className={styles.alreadyJoined}>✅ 참여 중</span>
+                    </div>
+                  ) : (
+                    // 아직 참여하지 않은 경우
+                    <button
+                      onClick={(e) => handleJoinTraining(e)}
+                      className={styles.joinButton}
+                      disabled={
+                        localPost.recruitmentInfo.currentParticipants >=
+                        localPost.recruitmentInfo.maxParticipants
+                      }
+                    >
+                      {localPost.recruitmentInfo.currentParticipants >=
+                      localPost.recruitmentInfo.maxParticipants
+                        ? "모집 완료"
+                        : "참여하기"}
+                    </button>
+                  )}
+                </div>
+              )}
           </div>
         </div>
       )}
@@ -314,12 +392,14 @@ export default function PostCard({
           <button
             onClick={handleLikeClick}
             className={`${styles.likeButton} ${
-              isLiked(post.id) ? styles.liked : ""
+              isLiked(localPost.id) ? styles.liked : ""
             }`}
           >
-            ❤️ {post.likes || 0}
+            ❤️ {localPost.likes || 0}
           </button>
-          <span className={styles.commentsCount}>💬 {post.comments || 0}</span>
+          <span className={styles.commentsCount}>
+            💬 {localPost.comments || 0}
+          </span>
         </div>
       </div>
     </div>

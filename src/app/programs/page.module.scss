@@ -60,6 +60,53 @@
     gap: 16px;
   }
 
+  .headerContent {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+
+    .backButton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      color: #64748b;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #f8fafc;
+        border-color: #3b82f6;
+        color: #3b82f6;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .titleSection {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+      }
+    }
+  }
+
   .createButton {
     padding: 0.875rem 1.75rem;
     font-weight: 600;
@@ -220,5 +267,169 @@
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}
+
+// Tabs Section
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0;
+
+  .tab {
+    padding: 1rem 2rem;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+
+    &:hover {
+      color: #3b82f6;
+    }
+
+    &.active {
+      color: #3b82f6;
+      border-bottom-color: #3b82f6;
+    }
+  }
+}
+
+// Participated Section
+.participatedSection {
+  width: 100%;
+}
+
+.postsGrid {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+
+  // 모바일: 1열
+  grid-template-columns: 1fr;
+
+  // 태블릿: 2열
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  // 데스크톱: 3열
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+.participatedPost {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .postHeader {
+    margin-bottom: 1rem;
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.4;
+    }
+
+    .author {
+      font-size: 0.9rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+  }
+
+  .postContent {
+    margin-bottom: 1rem;
+
+    p {
+      color: #475569;
+      line-height: 1.6;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  .recruitmentInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+
+    .type {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #3b82f6;
+      background: #dbeafe;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      align-self: flex-start;
+    }
+
+    .location {
+      font-size: 0.9rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .participants {
+      font-size: 0.9rem;
+      color: #059669;
+      font-weight: 600;
+    }
+  }
+
+  .postFooter {
+    display: flex;
+    justify-content: flex-end;
+
+    .participationStatus {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #059669;
+      background: #d1fae5;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+    }
   }
 }

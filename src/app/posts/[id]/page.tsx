@@ -1,18 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import { Post, Comment } from "@/types";
 import { communityAPI } from "@/utils/api";
 import { useLikedPosts } from "@/hooks/useLikedPosts";
+import { useAuth } from "@/contexts/AuthContext";
 import { CommentItem, CommentForm } from "@/components/community";
 import styles from "./page.module.scss";
+import IconArrowLeft from "@assets/icon_arrow_left.svg";
 
 export default function PostDetail() {
   const params = useParams();
+  const router = useRouter();
   const postId = Number(params.id);
   const { isLiked, setLiked } = useLikedPosts();
+  const { user } = useAuth();
 
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -84,6 +88,72 @@ export default function PostDetail() {
     setComments((prev) => prev.filter((comment) => comment.id !== commentId));
   };
 
+  const handleJoinTraining = async () => {
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      await communityAPI.joinTrainingRecruitment(postId);
+      alert("훈련에 성공적으로 참여했습니다!");
+
+      // 페이지 새로고침 대신 상태 업데이트
+      setPost((prev) => {
+        if (!prev) return null;
+
+        return {
+          ...prev,
+          isParticipating: true,
+          participants: [...(prev.participants || []), user],
+          recruitmentInfo: {
+            ...prev.recruitmentInfo!,
+            currentParticipants:
+              (prev.recruitmentInfo?.currentParticipants || 0) + 1,
+          },
+        };
+      });
+    } catch (error) {
+      console.error("훈련 참여 실패:", error);
+      alert("훈련 참여에 실패했습니다.");
+    }
+  };
+
+  const handleLeaveTraining = async () => {
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+
+    try {
+      await communityAPI.leaveTrainingRecruitment(postId);
+      alert("훈련 참여를 취소했습니다.");
+
+      // 페이지 새로고침 대신 상태 업데이트
+      setPost((prev) => {
+        if (!prev) return null;
+
+        return {
+          ...prev,
+          isParticipating: false,
+          participants: (prev.participants || []).filter(
+            (p) => p.id !== user.id
+          ),
+          recruitmentInfo: {
+            ...prev.recruitmentInfo!,
+            currentParticipants: Math.max(
+              0,
+              (prev.recruitmentInfo?.currentParticipants || 0) - 1
+            ),
+          },
+        };
+      });
+    } catch (error) {
+      console.error("훈련 참여 취소 실패:", error);
+      alert("훈련 참여 취소에 실패했습니다.");
+    }
+  };
+
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -129,6 +199,17 @@ export default function PostDetail() {
     <Layout>
       <div className={styles.container}>
         <div className={styles.postDetail}>
+          {/* 뒤로가기 버튼 */}
+          <div className={styles.backButtonContainer}>
+            <button
+              onClick={() => router.back()}
+              className={styles.backButton}
+              aria-label="뒤로 가기"
+            >
+              <IconArrowLeft width={20} height={20} />
+            </button>
+          </div>
+
           {/* 게시물 헤더 */}
           <div className={styles.postHeader}>
             <div className={styles.postMeta}>
@@ -145,6 +226,133 @@ export default function PostDetail() {
           <div className={styles.content}>
             <p>{post.content}</p>
           </div>
+
+          {/* 훈련 모집 정보 (훈련 모집 카테고리인 경우에만 표시) */}
+          {post.recruitmentInfo && (
+            <div className={styles.recruitmentInfo}>
+              <h3>🏊‍♂️ 훈련 모집 정보</h3>
+              <div className={styles.recruitmentDetails}>
+                <div className={styles.recruitmentType}>
+                  <strong>훈련 유형:</strong>{" "}
+                  {post.recruitmentInfo.type === "regular"
+                    ? "정기 모임"
+                    : "단기 모임"}
+                </div>
+
+                {post.recruitmentInfo.location && (
+                  <div className={styles.recruitmentLocation}>
+                    <strong>장소:</strong> 📍 {post.recruitmentInfo.location}
+                  </div>
+                )}
+
+                {post.recruitmentInfo.type === "regular" &&
+                  post.recruitmentInfo.meetingDays && (
+                    <div className={styles.recruitmentSchedule}>
+                      <strong>훈련 요일:</strong> 📅{" "}
+                      {post.recruitmentInfo.meetingDays
+                        .map((day) => {
+                          const dayMap: { [key: string]: string } = {
+                            monday: "월요일",
+                            tuesday: "화요일",
+                            wednesday: "수요일",
+                            thursday: "목요일",
+                            friday: "금요일",
+                            saturday: "토요일",
+                            sunday: "일요일",
+                          };
+                          return dayMap[day] || day;
+                        })
+                        .join(", ")}
+                    </div>
+                  )}
+
+                {post.recruitmentInfo.meetingTime && (
+                  <div className={styles.recruitmentTime}>
+                    <strong>훈련 시간:</strong> 🕐{" "}
+                    {post.recruitmentInfo.meetingTime}
+                  </div>
+                )}
+
+                {post.recruitmentInfo.type === "one-time" &&
+                  post.recruitmentInfo.meetingDateTime && (
+                    <div className={styles.recruitmentDateTime}>
+                      <strong>훈련 일시:</strong> 📅{" "}
+                      {new Date(
+                        post.recruitmentInfo.meetingDateTime
+                      ).toLocaleDateString("ko-KR")}{" "}
+                      🕐{" "}
+                      {new Date(
+                        post.recruitmentInfo.meetingDateTime
+                      ).toLocaleTimeString("ko-KR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
+                  )}
+
+                <div className={styles.recruitmentParticipants}>
+                  <strong>참가자:</strong> 👥{" "}
+                  {post.recruitmentInfo.currentParticipants} /{" "}
+                  {post.recruitmentInfo.maxParticipants}명
+                </div>
+
+                <div className={styles.recruitmentStatus}>
+                  <strong>상태:</strong>{" "}
+                  <span
+                    className={`${styles.statusBadge} ${
+                      styles[post.recruitmentInfo.status]
+                    }`}
+                  >
+                    {post.recruitmentInfo.status === "open"
+                      ? "모집 중"
+                      : post.recruitmentInfo.status === "full"
+                      ? "모집 완료"
+                      : "모집 종료"}
+                  </span>
+                </div>
+
+                {/* 참여 버튼 */}
+                {post.recruitmentInfo.status === "open" &&
+                  user &&
+                  user.id !== post.author.id && (
+                    <div className={styles.joinSection}>
+                      {/* 현재 사용자가 이미 참여 중인지 확인 (participants 배열 직접 확인) */}
+                      {post.participants?.some(
+                        (participant) => participant.id === user.id
+                      ) ? (
+                        // 이미 참여 중인 경우
+                        <div className={styles.participationStatus}>
+                          <span className={styles.alreadyJoined}>
+                            ✅ 이미 참여 중입니다
+                          </span>
+                          <button
+                            onClick={handleLeaveTraining}
+                            className={`${styles.joinButton} ${styles.leaveButton}`}
+                          >
+                            참여 취소하기
+                          </button>
+                        </div>
+                      ) : (
+                        // 아직 참여하지 않은 경우
+                        <button
+                          onClick={handleJoinTraining}
+                          className={styles.joinButton}
+                          disabled={
+                            post.recruitmentInfo.currentParticipants >=
+                            post.recruitmentInfo.maxParticipants
+                          }
+                        >
+                          {post.recruitmentInfo.currentParticipants >=
+                          post.recruitmentInfo.maxParticipants
+                            ? "모집 완료"
+                            : "훈련 참여하기"}
+                        </button>
+                      )}
+                    </div>
+                  )}
+              </div>
+            </div>
+          )}
 
           {/* 게시물 액션 */}
           <div className={styles.actions}>
