@@ -199,21 +199,19 @@ export default function PostDetail() {
     <Layout>
       <div className={styles.container}>
         <div className={styles.postDetail}>
-          {/* 뒤로가기 버튼 */}
-          <div className={styles.backButtonContainer}>
-            <button
-              onClick={() => router.back()}
-              className={styles.backButton}
-              aria-label="뒤로 가기"
-            >
-              <IconArrowLeft width={20} height={20} />
-            </button>
-          </div>
-
           {/* 게시물 헤더 */}
           <div className={styles.postHeader}>
             <div className={styles.postMeta}>
-              <span className={styles.category}>{post.category}</span>
+              <div className={styles.backButtonContainer}>
+                <button
+                  onClick={() => router.push("/community")}
+                  className={styles.backButton}
+                  aria-label="뒤로 가기"
+                >
+                  <IconArrowLeft width={20} height={20} />
+                </button>
+                <span className={styles.category}>{post.category}</span>
+              </div>
               <span className={styles.time}>{formatTime(post.createdAt)}</span>
             </div>
             <h1 className={styles.title}>{post.title}</h1>

@@ -58,6 +58,33 @@
   }
 }
 
+.backButton {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #1e293b;
+    background-color: #f1f5f9;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .header {
   display: flex;
   justify-content: space-between;

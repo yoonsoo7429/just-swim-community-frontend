@@ -66,33 +66,6 @@
     gap: 1rem;
     width: 100%;
 
-    .backButton {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      background: white;
-      border: 2px solid #e2e8f0;
-      color: #64748b;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: #f8fafc;
-        border-color: #3b82f6;
-        color: #3b82f6;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-      }
-
-      svg {
-        width: 20px;
-        height: 20px;
-      }
-    }
-
     .titleSection {
       flex: 1;
       display: flex;
@@ -128,6 +101,27 @@
     &:active {
       transform: translateY(0);
     }
+  }
+}
+
+.backButton {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #1e293b;
+    background-color: #f1f5f9;
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 }
 
@@ -381,8 +375,8 @@
       line-height: 1.6;
       margin: 0;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
       overflow: hidden;
     }
   }

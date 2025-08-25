@@ -140,11 +140,11 @@ const ProgramsPage: React.FC = () => {
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push("/")}
               className={styles.backButton}
               title="뒤로 가기"
             >
-              <IconArrowLeft />
+              <IconArrowLeft width={20} height={20} />
             </button>
             <div className={styles.titleSection}>
               <h1 className={styles.title}>🏊‍♂️ 내 훈련</h1>

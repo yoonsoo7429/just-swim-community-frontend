@@ -60,7 +60,7 @@ const ProgramDetailPage: React.FC = () => {
 
       // 2. 커뮤니티에 모집글 자동 생성 (상세 정보 포함)
       const recruitmentPost = {
-        title: `[훈련 모집] ${program.title}`,
+        title: program.title,
         content: `훈련 프로그램 "${
           program.title
         }"에 참여할 사람을 모집합니다.\n\n${

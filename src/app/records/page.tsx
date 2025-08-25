@@ -14,6 +14,7 @@ import { SwimmingRecord } from "@/types";
 import SignInButton from "@/components/auth/SignInButton";
 import SignUpButton from "@/components/auth/SignUpButton";
 import styles from "./page.module.scss";
+import IconArrowLeft from "@assets/icon_arrow_left.svg";
 
 interface RecordWithShareStatus extends SwimmingRecord {
   isShared?: boolean;
@@ -218,7 +219,16 @@ export default function RecordsPage() {
     <Layout>
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>내 수영 기록</h1>
+          <div className={styles.title}>
+            <button
+              onClick={() => router.push("/")}
+              className={styles.backButton}
+              aria-label="뒤로 가기"
+            >
+              <IconArrowLeft width={20} height={20} />
+            </button>
+            <h1>내 수영 기록</h1>
+          </div>
           <Button
             variant="primary"
             onClick={() => setIsFormOpen(true)}
