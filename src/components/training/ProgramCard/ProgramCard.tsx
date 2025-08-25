@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { TrainingProgram } from "@/types";
 import { getDifficultyText } from "@/utils";
@@ -24,23 +24,43 @@ const ProgramCard: React.FC<ProgramCardProps> = ({
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner":
-        return "#4CAF50";
+        return "#10b981";
       case "intermediate":
-        return "#FF9800";
+        return "#f59e0b";
       case "advanced":
-        return "#F44336";
+        return "#ef4444";
       default:
-        return "#9E9E9E";
+        return "#6b7280";
     }
   };
 
-  const handleJoin = () => {
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
+    if (diffInHours < 1) return "방금 전";
+    if (diffInHours < 24) return `${diffInHours}시간 전`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}일 전`;
+
+    return date.toLocaleDateString("ko-KR");
+  };
+
+  const handleJoin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (onJoin) {
       onJoin(program.id);
     }
   };
 
-  const handleLeave = () => {
+  const handleLeave = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (onLeave) {
       onLeave(program.id);
     }
@@ -49,13 +69,27 @@ const ProgramCard: React.FC<ProgramCardProps> = ({
   // 컴팩트 모드 (전체 보기)
   if (viewMode === "compact") {
     return (
-      <div className={styles.programCardCompact}>
-        <Link href={`/programs/${program.id}`} className={styles.cardLink}>
-          <div className={styles.headerCompact}>
-            <div className={styles.titleSectionCompact}>
-              <h3 className={styles.titleCompact}>{program.title}</h3>
+      <div className={styles.programCard}>
+        <Link href={`/programs/${program.id}`}>
+          <div className={styles.programHeader}>
+            <div className={styles.authorInfo}>
+              <div className={styles.avatar}>
+                <div className={styles.avatarPlaceholder}>
+                  {program.user?.name?.charAt(0) || "?"}
+                </div>
+              </div>
+              <div className={styles.authorDetails}>
+                <div className={styles.authorName}>
+                  {program.user?.name || "알 수 없음"}
+                </div>
+                <div className={styles.programTime}>
+                  {formatTime(program.createdAt)}
+                </div>
+              </div>
+            </div>
+            <div className={styles.programActions}>
               <span
-                className={styles.difficultyCompact}
+                className={styles.difficultyBadge}
                 style={{
                   backgroundColor: getDifficultyColor(program.difficulty),
                 }}
@@ -65,70 +99,104 @@ const ProgramCard: React.FC<ProgramCardProps> = ({
             </div>
           </div>
 
-          {/* 기본 정보 (항상 표시) */}
-          <div className={styles.basicInfo}>
-            <div className={styles.statusTags}>
-              <span className={styles.visibilityTag}>
-                {program.visibility === "public" ? "공개" : "비공개"}
-              </span>
-              <span className={styles.publishTag}>
-                {program.isPublished ? "게시됨" : "임시저장"}
-              </span>
-            </div>
+          <div className={styles.programContent}>
+            <h3 className={styles.programTitle}>{program.title}</h3>
 
             {program.description && (
-              <p className={styles.descriptionPreview}>
-                {program.description.length > 50
-                  ? `${program.description.substring(0, 50)}...`
+              <p className={styles.programDescription}>
+                {program.description.length > 100
+                  ? `${program.description.substring(0, 100)}...`
                   : program.description}
               </p>
             )}
+
+            <div className={styles.programMeta}>
+              <span
+                className={`${styles.statusBadge} ${styles.visibilityBadge}`}
+              >
+                {program.visibility === "public" ? "공개" : "비공개"}
+              </span>
+              <span className={`${styles.statusBadge} ${styles.publishBadge}`}>
+                {program.isPublished ? "게시됨" : "임시저장"}
+              </span>
+            </div>
           </div>
         </Link>
 
         {/* 액션 버튼들 */}
-        <div className={styles.cardActions}>
-          {showActions && !isMyProgram && (
-            <div className={styles.participationActions}>
-              <button
-                className={styles.joinButton}
-                onClick={() => handleJoin()}
-              >
+        {showActions && (
+          <div className={styles.cardActions}>
+            {!isMyProgram ? (
+              <button className={styles.joinButton} onClick={handleJoin}>
                 참여하기
               </button>
-            </div>
-          )}
-        </div>
+            ) : (
+              <button
+                className={styles.editButton}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                수정하기
+              </button>
+            )}
+          </div>
+        )}
       </div>
     );
   }
 
   // 상세 모드
   return (
-    <Link href={`/programs/${program.id}`} className={styles.programCard}>
-      <div className={styles.header}>
-        <h3 className={styles.title}>{program.title}</h3>
-        <span
-          className={styles.difficulty}
-          style={{ backgroundColor: getDifficultyColor(program.difficulty) }}
-        >
-          {getDifficultyText(program.difficulty)}
-        </span>
-      </div>
+    <div className={styles.programCardDetailed}>
+      <Link href={`/programs/${program.id}`} className={styles.cardLink}>
+        <div className={styles.programHeader}>
+          <div className={styles.authorInfo}>
+            <div className={styles.avatar}>
+              <div className={styles.avatarPlaceholder}>
+                {program.user?.name?.charAt(0) || "?"}
+              </div>
+            </div>
+            <div className={styles.authorDetails}>
+              <div className={styles.authorName}>
+                {program.user?.name || "알 수 없음"}
+              </div>
+              <div className={styles.programTime}>
+                {formatTime(program.createdAt)}
+              </div>
+            </div>
+          </div>
+          <div className={styles.programActions}>
+            <span
+              className={styles.difficultyBadge}
+              style={{
+                backgroundColor: getDifficultyColor(program.difficulty),
+              }}
+            >
+              {getDifficultyText(program.difficulty)}
+            </span>
+          </div>
+        </div>
 
-      {program.description && (
-        <p className={styles.description}>{program.description}</p>
-      )}
+        <div className={styles.programContent}>
+          <h3 className={styles.programTitle}>{program.title}</h3>
 
-      <div className={styles.footer}>
-        <span className={styles.visibility}>
-          {program.visibility === "public" ? "공개" : "비공개"}
-        </span>
-        <span className={styles.status}>
-          {program.isPublished ? "게시됨" : "임시저장"}
-        </span>
-      </div>
-    </Link>
+          {program.description && (
+            <p className={styles.programDescription}>{program.description}</p>
+          )}
+
+          <div className={styles.programMeta}>
+            <span className={`${styles.statusBadge} ${styles.visibilityBadge}`}>
+              {program.visibility === "public" ? "공개" : "비공개"}
+            </span>
+            <span className={`${styles.statusBadge} ${styles.publishBadge}`}>
+              {program.isPublished ? "게시됨" : "임시저장"}
+            </span>
+          </div>
+        </div>
+      </Link>
+    </div>
   );
 };
 

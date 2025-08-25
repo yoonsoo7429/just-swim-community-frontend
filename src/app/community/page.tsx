@@ -152,7 +152,7 @@ export default function CommunityPage() {
             {user && (
               <div className={styles.postActions}>
                 <Button onClick={() => setIsCreateModalOpen(true)}>
-                  새 게시물 작성
+                  새 게시물
                 </Button>
               </div>
             )}

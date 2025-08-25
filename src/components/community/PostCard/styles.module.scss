@@ -305,19 +305,33 @@
 
 // 훈련 모집 관련 스타일
 .recruitmentPreview {
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 20px;
   margin: 20px 0;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 
   &:hover {
-    background: #e0f2fe;
-    border-color: #7dd3fc;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    border-color: #3b82f6;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    transform: translateY(-1px);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+    border-radius: 0 2px 2px 0;
   }
 }
 
