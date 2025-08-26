@@ -294,6 +294,13 @@ export default function PostDetail() {
                   {post.recruitmentInfo.maxParticipants}명
                 </div>
 
+                <div className={styles.recruitmentFee}>
+                  <strong>참가료:</strong> 💰{" "}
+                  {post.participationFee
+                    ? `${post.participationFee.toLocaleString()}원`
+                    : "무료"}
+                </div>
+
                 <div className={styles.recruitmentStatus}>
                   <strong>상태:</strong>{" "}
                   <span

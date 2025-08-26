@@ -24,7 +24,7 @@ interface RecruitmentFormData {
   contactInfo: string;
   requirements: string;
   equipment: string;
-  cost: string;
+  participationFee?: number;
   specialNotes: string;
 }
 
@@ -54,7 +54,7 @@ const CreateProgramModal: React.FC<CreateProgramModalProps> = ({
     contactInfo: "",
     requirements: "",
     equipment: "",
-    cost: "",
+    participationFee: undefined,
     specialNotes: "",
   });
 
@@ -137,6 +137,7 @@ const CreateProgramModal: React.FC<CreateProgramModalProps> = ({
           maxParticipants: recruitmentData.maxParticipants,
           currentParticipants: 0,
           recruitmentStatus: "open",
+          participationFee: recruitmentData.participationFee, // Add participationFee to recruitmentPost
         };
 
         await postsAPI.createPost(recruitmentPost);
@@ -181,7 +182,7 @@ const CreateProgramModal: React.FC<CreateProgramModalProps> = ({
       contactInfo: "",
       requirements: "",
       equipment: "",
-      cost: "",
+      participationFee: undefined,
       specialNotes: "",
     });
   };
@@ -526,16 +527,24 @@ const CreateProgramModal: React.FC<CreateProgramModalProps> = ({
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="cost">참여 비용</label>
+              <label htmlFor="participationFee">참가료</label>
               <Input
-                id="cost"
-                type="text"
-                value={recruitmentData.cost}
+                id="participationFee"
+                type="number"
+                min="0"
+                step="100"
+                value={recruitmentData.participationFee || ""}
                 onChange={(e) =>
-                  handleRecruitmentChange("cost", e.target.value)
+                  handleRecruitmentChange(
+                    "participationFee",
+                    e.target.value ? parseFloat(e.target.value) : undefined
+                  )
                 }
-                placeholder="예: 무료 또는 50,000원"
+                placeholder="예: 50000 (원 단위)"
               />
+              <p className={styles.helpText}>
+                참가료를 입력하지 않으면 무료로 설정됩니다.
+              </p>
             </div>
 
             <div className={styles.formGroup}>

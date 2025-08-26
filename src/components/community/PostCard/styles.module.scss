@@ -422,7 +422,9 @@
 .recruitmentParticipants {
   display: flex;
   justify-content: center;
+  gap: 12px;
   margin-top: 8px;
+  flex-wrap: wrap;
 }
 
 .participantsCount {
@@ -433,6 +435,16 @@
   font-size: 14px;
   font-weight: 600;
   border: 1px solid #fbbf24;
+}
+
+.participationFee {
+  background: #f0f9ff;
+  color: #0369a1;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid #0ea5e9;
 }
 
 .recruitmentActions {

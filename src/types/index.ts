@@ -38,6 +38,7 @@ export interface Post {
     maxParticipants: number;
     currentParticipants: number;
     status: string;
+    participationFee?: number;
   };
 }
 
@@ -126,6 +127,7 @@ export interface TrainingProgram {
   difficulty: "beginner" | "intermediate" | "advanced";
   visibility: "public" | "private";
   isPublished: boolean;
+  participationFee?: number;
   user: User;
   createdAt: string;
   updatedAt: string;
@@ -172,6 +174,7 @@ export interface CreateTrainingProgramDto {
   difficulty: "beginner" | "intermediate" | "advanced";
   visibility: "public" | "private";
   isPublished?: boolean;
+  participationFee?: number;
 }
 
 export interface CreateTrainingSessionDto {
