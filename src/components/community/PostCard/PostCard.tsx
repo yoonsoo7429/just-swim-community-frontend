@@ -350,7 +350,7 @@ export default function PostCard({
                 👥 {localPost.recruitmentInfo.currentParticipants || 0} /{" "}
                 {localPost.recruitmentInfo.maxParticipants || 0}명
               </span>
-              {localPost.recruitmentInfo.participationFee && (
+              {localPost.recruitmentInfo.participationFee > 0 ? (
                 <span className={styles.participationFee}>
                   💰{" "}
                   {Number(
@@ -358,8 +358,7 @@ export default function PostCard({
                   ).toLocaleString()}
                   원
                 </span>
-              )}
-              {!localPost.recruitmentInfo.participationFee && (
+              ) : (
                 <span className={styles.participationFee}>💰 무료</span>
               )}
             </div>
