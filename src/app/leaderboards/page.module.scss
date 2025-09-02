@@ -1,0 +1,289 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  h1 {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 18px;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+}
+
+.strokeSelector {
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    margin: 0 0 16px 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+.strokeOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.strokeOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+
+  &:hover {
+    background: #e9ecef;
+    transform: translateY(-1px);
+  }
+
+  &.active {
+    background: #e3f2fd;
+    border-color: #2196f3;
+    color: #1976d2;
+  }
+}
+
+.strokeIcon {
+  font-size: 20px;
+}
+
+.strokeLabel {
+  font-size: 14px;
+}
+
+.leaderboardSection {
+  margin-bottom: 40px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  h2 {
+    margin: 0;
+    color: #333;
+    font-size: 24px;
+    font-weight: 700;
+  }
+}
+
+.userRankInfo {
+  .yourRank {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2196f3;
+    background: rgba(33, 150, 243, 0.1);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 2px solid rgba(33, 150, 243, 0.2);
+  }
+}
+
+.loadingCards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonCard {
+  height: 80px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 12px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.leaderboardList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  p {
+    margin: 8px 0;
+
+    &:first-child {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    &:last-child {
+      font-size: 14px;
+    }
+  }
+}
+
+.motivationSection {
+  margin-top: 40px;
+}
+
+.motivationCard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 32px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    );
+    z-index: 0;
+  }
+
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      padding: 8px 0;
+      padding-left: 24px;
+      position: relative;
+
+      &::before {
+        content: "💡";
+        position: absolute;
+        left: 0;
+        top: 8px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+  }
+
+  .header p {
+    font-size: 16px;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    h2 {
+      font-size: 20px;
+    }
+  }
+
+  .strokeOptions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .strokeOption {
+    padding: 10px 12px;
+  }
+
+  .motivationCard {
+    padding: 24px;
+
+    h3 {
+      font-size: 18px;
+    }
+
+    ul li {
+      padding: 6px 0;
+      padding-left: 20px;
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .strokeOptions {
+    grid-template-columns: 1fr;
+  }
+
+  .userRankInfo .yourRank {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}

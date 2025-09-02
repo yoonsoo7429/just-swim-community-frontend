@@ -1,0 +1,282 @@
+.levelProgress {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 20px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    );
+    z-index: 0;
+  }
+
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  &.small {
+    padding: 12px;
+    border-radius: 12px;
+
+    .levelIcon {
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+    }
+
+    .level {
+      font-size: 14px;
+    }
+
+    .title {
+      font-size: 11px;
+    }
+
+    .progressBar {
+      height: 6px;
+    }
+  }
+
+  &.large {
+    padding: 32px;
+    border-radius: 20px;
+
+    .levelIcon {
+      font-size: 32px;
+      width: 60px;
+      height: 60px;
+    }
+
+    .level {
+      font-size: 24px;
+    }
+
+    .title {
+      font-size: 16px;
+    }
+
+    .progressBar {
+      height: 12px;
+    }
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.levelInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.levelIcon {
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+}
+
+.levelText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.level {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.title {
+  font-size: 13px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.xpInfo {
+  text-align: right;
+}
+
+.currentXP {
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.progressContainer {
+  margin-bottom: 16px;
+}
+
+.progressBar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #00f5ff 0%, #00d4ff 50%, #0099ff 100%);
+  border-radius: 4px;
+  position: relative;
+  transition: width 0.5s ease;
+  overflow: hidden;
+}
+
+.progressGlow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressText {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.progress {
+  font-weight: 600;
+}
+
+.remaining {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.nextLevel {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nextLevelText {
+  font-size: 12px;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.maxLevel {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+}
+
+.maxLevelText {
+  font-size: 14px;
+  font-weight: 600;
+  animation: rainbow 3s linear infinite;
+}
+
+@keyframes rainbow {
+  0% {
+    color: #ff0000;
+  }
+  14% {
+    color: #ff8000;
+  }
+  28% {
+    color: #ffff00;
+  }
+  42% {
+    color: #80ff00;
+  }
+  57% {
+    color: #00ff80;
+  }
+  71% {
+    color: #0080ff;
+  }
+  85% {
+    color: #8000ff;
+  }
+  100% {
+    color: #ff0000;
+  }
+}
+
+@media (max-width: 768px) {
+  .levelProgress {
+    padding: 16px;
+  }
+
+  .header {
+    margin-bottom: 12px;
+  }
+
+  .levelIcon {
+    font-size: 20px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .level {
+    font-size: 16px;
+  }
+
+  .title {
+    font-size: 12px;
+  }
+
+  .currentXP {
+    font-size: 14px;
+  }
+
+  .progressText {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .remaining {
+    align-self: flex-end;
+  }
+}

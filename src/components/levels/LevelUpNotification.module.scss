@@ -1,0 +1,385 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.notification {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: levelUpAnimation 0.8s ease-out;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.fireworks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.firework {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  animation: fireworkExplosion 2s infinite;
+
+  &:nth-child(1) {
+    top: 20%;
+    left: 20%;
+    background: #ff6b6b;
+    animation-delay: 0s;
+  }
+
+  &:nth-child(2) {
+    top: 30%;
+    right: 20%;
+    background: #4ecdc4;
+    animation-delay: 0.7s;
+  }
+
+  &:nth-child(3) {
+    bottom: 30%;
+    left: 30%;
+    background: #ffe66d;
+    animation-delay: 1.4s;
+  }
+}
+
+@keyframes fireworkExplosion {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(20);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(40);
+    opacity: 0;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 1;
+
+  .title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+    flex: 1;
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .closeButton {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+  }
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+.levelChange {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.levelBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  animation: bounce 1s ease-out;
+}
+
+.levelIcon {
+  font-size: 48px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.levelNumber {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.arrow {
+  font-size: 32px;
+  font-weight: bold;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.newTitle {
+  text-align: center;
+  margin-bottom: 24px;
+
+  .congratulations {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    animation: rainbow 3s linear infinite;
+  }
+
+  .titleText {
+    font-size: 18px;
+    margin: 0;
+    opacity: 0.9;
+
+    strong {
+      font-weight: 700;
+      color: #ffd700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+.xpGained {
+  text-align: center;
+  margin-bottom: 24px;
+
+  .xpText {
+    font-size: 20px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 12px;
+    display: inline-block;
+    backdrop-filter: blur(10px);
+  }
+}
+
+.perks {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(10px);
+
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffd700;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+
+    li {
+      margin-bottom: 6px;
+      font-size: 14px;
+      opacity: 0.9;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.actions {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+
+  .continueButton {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+    color: white;
+    border: none;
+    padding: 16px 40px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes levelUpAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.8);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  }
+  to {
+    text-shadow: 0 0 30px rgba(255, 255, 255, 1),
+      0 0 40px rgba(255, 215, 0, 0.8);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes rainbow {
+  0% {
+    color: #ff0000;
+  }
+  14% {
+    color: #ff8000;
+  }
+  28% {
+    color: #ffff00;
+  }
+  42% {
+    color: #80ff00;
+  }
+  57% {
+    color: #00ff80;
+  }
+  71% {
+    color: #0080ff;
+  }
+  85% {
+    color: #8000ff;
+  }
+  100% {
+    color: #ff0000;
+  }
+}
+
+@media (max-width: 600px) {
+  .notification {
+    padding: 24px;
+    border-radius: 20px;
+  }
+
+  .header .title {
+    font-size: 24px;
+  }
+
+  .levelChange {
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .levelBadge {
+    padding: 16px;
+  }
+
+  .levelIcon {
+    font-size: 36px;
+  }
+
+  .levelNumber {
+    font-size: 20px;
+  }
+
+  .arrow {
+    font-size: 24px;
+  }
+
+  .newTitle .congratulations {
+    font-size: 20px;
+  }
+
+  .newTitle .titleText {
+    font-size: 16px;
+  }
+}

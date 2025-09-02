@@ -1,0 +1,208 @@
+.userLevelBadge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+  }
+}
+
+.levelInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.levelIcon {
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.levelDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 50px;
+}
+
+.level {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1;
+}
+
+.progressBar {
+  width: 50px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #00f5ff 0%, #0099ff 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.badgesInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.badgeIcons {
+  display: flex;
+  position: relative;
+}
+
+.badgeIcon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  font-size: 12px;
+  border: 2px solid #fff;
+  margin-left: -8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:hover {
+    transform: scale(1.1);
+    z-index: 10 !important;
+  }
+}
+
+.badgeCount {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  line-height: 1;
+}
+
+.skeleton {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+}
+
+.skeletonLevel {
+  width: 80px;
+  height: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+.skeletonBadges {
+  width: 60px;
+  height: 24px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 12px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// 다크모드 대응
+@media (prefers-color-scheme: dark) {
+  .level,
+  .badgeCount {
+    color: #fff;
+  }
+
+  .progressBar {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .skeletonLevel,
+  .skeletonBadges {
+    background: linear-gradient(90deg, #333 25%, #555 50%, #333 75%);
+    background-size: 200% 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .userLevelBadge {
+    gap: 12px;
+    padding: 6px;
+  }
+
+  .levelIcon {
+    font-size: 18px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .levelDetails {
+    min-width: 45px;
+  }
+
+  .progressBar {
+    width: 45px;
+    height: 3px;
+  }
+
+  .badgeIcon {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    margin-left: -6px;
+  }
+
+  .level,
+  .badgeCount {
+    font-size: 10px;
+  }
+}

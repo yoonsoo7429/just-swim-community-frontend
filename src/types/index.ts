@@ -29,6 +29,7 @@ export interface Post {
   participants?: User[]; // 훈련 참여자들
   swimmingRecord?: SwimmingRecord;
   trainingProgram?: TrainingProgram;
+  challenge?: Challenge;
   recruitmentInfo?: {
     type: string;
     meetingDays: string[];
@@ -50,6 +51,19 @@ export type PostCategory =
   | "훈련 모집"
   | "챌린지"
   | "가이드";
+
+export interface Challenge {
+  id: number;
+  title: string;
+  category: string;
+  status: string;
+  targetValue: number;
+  unit: string;
+  startDate: string;
+  endDate: string;
+  rewardXP: number;
+  rewardPoints: number;
+}
 
 export interface Comment {
   id: number;

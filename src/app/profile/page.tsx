@@ -1,158 +1,433 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import Layout from "@/components/layout/Layout";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import Button from "@/components/ui/Button";
+import Layout from "@/components/layout/Layout";
+import LevelProgress from "@/components/levels/LevelProgress";
+import BadgeCard from "@/components/badges/BadgeCard";
 import styles from "./page.module.scss";
 
-export default function ProfilePage() {
-  const router = useRouter();
-  const { user, signOut } = useAuth();
+interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  profileImage?: string;
+  userLevel: number;
+  experience: number;
+  title: string;
+}
 
-  const handleLogout = async () => {
+interface UserLevelProgress {
+  currentLevel: number;
+  currentXP: number;
+  xpForCurrentLevel: number;
+  xpForNextLevel: number;
+  progressPercentage: number;
+  title: string;
+  nextTitle: string;
+  totalXPEarned: number;
+}
+
+interface Badge {
+  id: number;
+  key: string;
+  name: string;
+  description: string;
+  icon: string;
+  tier: string;
+  category: string;
+  points: number;
+  isActive: boolean;
+}
+
+interface UserBadge {
+  id: number;
+  earnedAt: string;
+  badge: Badge;
+}
+
+interface BadgeStats {
+  totalEarned: number;
+  totalAvailable: number;
+  completionRate: number;
+  totalPoints: number;
+  byCategory: {
+    [key: string]: {
+      earned: number;
+      total: number;
+      percentage: number;
+    };
+  };
+  byTier: {
+    [key: string]: {
+      earned: number;
+      total: number;
+      percentage: number;
+    };
+  };
+  recentBadges: UserBadge[];
+}
+
+interface UserRanking {
+  level: { rank: number; value: number } | null;
+  monthlyDistance: { rank: number; value: number } | null;
+  badges: { rank: number; value: number } | null;
+  streak: { rank: number; value: number } | null;
+}
+
+export default function ProfilePage() {
+  const { user, isLoading } = useAuth();
+  const [userProgress, setUserProgress] = useState<UserLevelProgress | null>(
+    null
+  );
+  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
+  const [badgeStats, setBadgeStats] = useState<BadgeStats | null>(null);
+  const [userRanking, setUserRanking] = useState<UserRanking>({
+    level: null,
+    monthlyDistance: null,
+    badges: null,
+    streak: null,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfileData();
+    }
+  }, [user]);
+
+  const fetchProfileData = async () => {
     try {
-      await signOut();
-      router.push("/");
+      setLoading(true);
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
+      // 레벨 진행도 조회
+      const progressResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/levels/my/progress`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (progressResponse.ok) {
+        const progressData = await progressResponse.json();
+        setUserProgress(progressData);
+      }
+
+      // 사용자 배지 조회
+      const badgesResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/badges/my`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (badgesResponse.ok) {
+        const badgesData = await badgesResponse.json();
+        setUserBadges(badgesData);
+      }
+
+      // 배지 통계 조회
+      const statsResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/badges/my/stats`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setBadgeStats(statsData);
+      }
+
+      // 사용자 순위 정보 조회
+      const rankingPromises = [
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/leaderboards/my-rank/level`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/leaderboards/my-rank/monthly_distance`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        ),
+        fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/leaderboards/my-rank/badges`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        ),
+        fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/leaderboards/my-rank/streak`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        ),
+      ];
+
+      const rankingResponses = await Promise.all(rankingPromises);
+      const rankingData = await Promise.all(
+        rankingResponses.map((res) => (res.ok ? res.json() : null))
+      );
+
+      setUserRanking({
+        level: rankingData[0],
+        monthlyDistance: rankingData[1],
+        badges: rankingData[2],
+        streak: rankingData[3],
+      });
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error("Failed to fetch profile data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!user) {
-    router.push("/");
-    return null;
+  if (isLoading || loading) {
+    return (
+      <Layout>
+        <div className={styles.loading}>
+          <p>프로필 정보를 불러오는 중...</p>
+        </div>
+      </Layout>
+    );
   }
 
-  const quickActions = [
-    {
-      title: "수영 기록",
-      description: "개인 수영 기록을 관리하고 성장을 추적하세요",
-      icon: "📊",
-      path: "/records",
-      color: "#3b82f6",
-    },
-    {
-      title: "훈련 프로그램",
-      description: "체계적인 훈련 프로그램으로 실력을 향상시키세요",
-      icon: "📋",
-      path: "/programs",
-      color: "#10b981",
-    },
-    {
-      title: "정기 모임",
-      description: "다른 수영인들과 함께하는 정기 모임에 참여하세요",
-      icon: "🏊‍♂️",
-      path: "/series",
-      color: "#f59e0b",
-    },
-    {
-      title: "커뮤니티",
-      description: "수영 경험과 팁을 공유하고 소통하세요",
-      icon: "💬",
-      path: "/community",
-      color: "#8b5cf6",
-    },
-  ];
+  if (!user) {
+    return (
+      <Layout>
+        <div className={styles.loginRequired}>
+          <h2>로그인이 필요합니다</h2>
+          <p>프로필을 확인하려면 로그인해주세요.</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className={styles.container}>
-        {/* 프로필 헤더 */}
-        <section className={styles.profileHeader}>
+        <div className={styles.header}>
           <div className={styles.profileInfo}>
-            <div className={styles.avatarSection}>
+            <div className={styles.avatar}>
               {user.profileImage ? (
-                <img
-                  src={user.profileImage}
-                  alt={user.name}
-                  className={styles.avatar}
-                />
+                <img src={user.profileImage} alt={user.name} />
               ) : (
-                <div className={styles.defaultAvatar}>
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
+                <span className={styles.avatarText}>
+                  {user.name?.[0]?.toUpperCase() || "?"}
+                </span>
               )}
             </div>
             <div className={styles.userDetails}>
-              <h1 className={styles.userName}>{user.name}</h1>
-              <p className={styles.userEmail}>{user.email}</p>
-              <p className={styles.welcomeMessage}>
-                Just Swim에 오신 것을 환영합니다! 🏊‍♂️
-              </p>
+              <h1>{user.name}</h1>
+              <p className={styles.email}>{user.email}</p>
+              {userProgress && (
+                <p className={styles.title}>{userProgress.title}</p>
+              )}
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* 빠른 액션 */}
-        <section className={styles.quickActions}>
-          <h2 className={styles.sectionTitle}>빠른 액션</h2>
-          <div className={styles.actionsGrid}>
-            {quickActions.map((action, index) => (
-              <div
-                key={index}
-                className={styles.actionCard}
-                onClick={() => router.push(action.path)}
-                style={{ borderLeftColor: action.color }}
-              >
-                <div
-                  className={styles.actionIcon}
-                  style={{ color: action.color }}
-                >
-                  {action.icon}
+        <div className={styles.content}>
+          <div className={styles.section}>
+            <h2>레벨 진행도</h2>
+            {userProgress ? (
+              <div className={styles.levelSection}>
+                <LevelProgress
+                  currentLevel={userProgress.currentLevel}
+                  currentXP={userProgress.currentXP}
+                  xpForCurrentLevel={userProgress.xpForCurrentLevel}
+                  xpForNextLevel={userProgress.xpForNextLevel}
+                  progressPercentage={userProgress.progressPercentage}
+                  title={userProgress.title}
+                  nextTitle={userProgress.nextTitle}
+                  size="large"
+                  showDetails={true}
+                />
+                <div className={styles.levelStats}>
+                  <div className={styles.statItem}>
+                    <span className={styles.statLabel}>현재 레벨</span>
+                    <span className={styles.statValue}>
+                      {userProgress.currentLevel}
+                    </span>
+                  </div>
+                  <div className={styles.statItem}>
+                    <span className={styles.statLabel}>총 경험치</span>
+                    <span className={styles.statValue}>
+                      {userProgress.totalXPEarned.toLocaleString()} XP
+                    </span>
+                  </div>
+                  <div className={styles.statItem}>
+                    <span className={styles.statLabel}>다음 레벨까지</span>
+                    <span className={styles.statValue}>
+                      {(
+                        userProgress.xpForNextLevel - userProgress.currentXP
+                      ).toLocaleString()}{" "}
+                      XP
+                    </span>
+                  </div>
                 </div>
-                <div className={styles.actionContent}>
-                  <h3 className={styles.actionTitle}>{action.title}</h3>
-                  <p className={styles.actionDescription}>
-                    {action.description}
-                  </p>
+
+                {/* 순위 정보 */}
+                <div className={styles.rankingInfo}>
+                  <h3>내 순위 정보</h3>
+                  <div className={styles.rankingGrid}>
+                    {userRanking.level && (
+                      <div className={styles.rankCard}>
+                        <span className={styles.rankLabel}>레벨 순위</span>
+                        <span className={styles.rankValue}>
+                          #{userRanking.level.rank}
+                        </span>
+                      </div>
+                    )}
+                    {userRanking.monthlyDistance && (
+                      <div className={styles.rankCard}>
+                        <span className={styles.rankLabel}>이달의 거리</span>
+                        <span className={styles.rankValue}>
+                          #{userRanking.monthlyDistance.rank}
+                        </span>
+                      </div>
+                    )}
+                    {userRanking.badges && (
+                      <div className={styles.rankCard}>
+                        <span className={styles.rankLabel}>배지 수집</span>
+                        <span className={styles.rankValue}>
+                          #{userRanking.badges.rank}
+                        </span>
+                      </div>
+                    )}
+                    {userRanking.streak && (
+                      <div className={styles.rankCard}>
+                        <span className={styles.rankLabel}>연속 수영</span>
+                        <span className={styles.rankValue}>
+                          #{userRanking.streak.rank}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.viewLeaderboard}>
+                    <button
+                      className={styles.leaderboardButton}
+                      onClick={() => (window.location.href = "/leaderboards")}
+                    >
+                      전체 리더보드 보기
+                    </button>
+                  </div>
                 </div>
-                <div className={styles.actionArrow}>→</div>
               </div>
-            ))}
+            ) : (
+              <p>레벨 정보를 불러올 수 없습니다.</p>
+            )}
           </div>
-        </section>
 
-        {/* 계정 관리 */}
-        <section className={styles.accountManagement}>
-          <h2 className={styles.sectionTitle}>계정 관리</h2>
-          <div className={styles.accountActions}>
-            <Button
-              variant="outline"
-              onClick={() => router.push("/profile/edit")}
-              className={styles.accountButton}
-            >
-              프로필 수정
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => router.push("/profile/settings")}
-              className={styles.accountButton}
-            >
-              설정
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => router.push("/profile/help")}
-              className={styles.accountButton}
-            >
-              도움말
-            </Button>
+          <div className={styles.section}>
+            <h2>배지 컬렉션</h2>
+            {badgeStats ? (
+              <div className={styles.badgeSection}>
+                <div className={styles.badgeOverview}>
+                  <div className={styles.overviewStats}>
+                    <div className={styles.statCard}>
+                      <h3>획득한 배지</h3>
+                      <p className={styles.statNumber}>
+                        {badgeStats.totalEarned}/{badgeStats.totalAvailable}
+                      </p>
+                    </div>
+                    <div className={styles.statCard}>
+                      <h3>달성률</h3>
+                      <p className={styles.statNumber}>
+                        {badgeStats.completionRate.toFixed(1)}%
+                      </p>
+                    </div>
+                    <div className={styles.statCard}>
+                      <h3>배지 포인트</h3>
+                      <p className={styles.statNumber}>
+                        {badgeStats.totalPoints.toLocaleString()}P
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 카테고리별 진행도 */}
+                <div className={styles.categoryProgress}>
+                  <h3>카테고리별 진행도</h3>
+                  <div className={styles.categoryList}>
+                    {Object.entries(badgeStats.byCategory).map(
+                      ([category, stats]) => (
+                        <div key={category} className={styles.categoryItem}>
+                          <div className={styles.categoryHeader}>
+                            <span>{getCategoryName(category)}</span>
+                            <span>
+                              {stats.earned}/{stats.total}
+                            </span>
+                          </div>
+                          <div className={styles.progressBar}>
+                            <div
+                              className={styles.progressFill}
+                              style={{ width: `${stats.percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* 최근 획득한 배지 */}
+                {badgeStats.recentBadges.length > 0 && (
+                  <div className={styles.recentBadges}>
+                    <h3>최근 획득한 배지</h3>
+                    <div className={styles.badgeGrid}>
+                      {badgeStats.recentBadges.map((userBadge) => (
+                        <BadgeCard
+                          key={userBadge.id}
+                          badge={userBadge.badge}
+                          isEarned={true}
+                          earnedAt={userBadge.earnedAt}
+                          size="medium"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 모든 배지 보기 버튼 */}
+                <div className={styles.viewAllBadges}>
+                  <button
+                    className={styles.viewAllButton}
+                    onClick={() => (window.location.href = "/badges")}
+                  >
+                    모든 배지 보기
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p>배지 정보를 불러올 수 없습니다.</p>
+            )}
           </div>
-        </section>
-
-        {/* 로그아웃 */}
-        <section className={styles.logoutSection}>
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className={styles.logoutButton}
-          >
-            로그아웃
-          </Button>
-        </section>
+        </div>
       </div>
     </Layout>
   );
+}
+
+function getCategoryName(category: string): string {
+  switch (category) {
+    case "distance":
+      return "거리";
+    case "consecutive":
+      return "연속성";
+    case "stroke":
+      return "영법";
+    case "special":
+      return "특별";
+    default:
+      return category;
+  }
 }

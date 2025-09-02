@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import SignInButton from "@/components/auth/SignInButton";
 import SignUpButton from "@/components/auth/SignUpButton";
 import { useAuth } from "@/contexts/AuthContext";
 import Button from "@/components/ui/Button";
+import UserLevelBadge from "./UserLevelBadge";
 import styles from "./styles.module.scss";
 
 interface HeaderProps {
@@ -12,6 +14,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ className = "" }) => {
+  const router = useRouter();
   const { user, signOut, signIn, signUp, isLoading, isInitialized } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
@@ -48,6 +51,10 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
     }
   };
 
+  const handleProfileClick = () => {
+    router.push("/profile");
+  };
+
   // 초기화가 완료되지 않았으면 스켈레톤 표시
   if (!isInitialized) {
     return (
@@ -78,10 +85,28 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
           </a>
         </div>
 
+        {user && (
+          <nav className={styles.navigation}>
+            <a href="/leaderboards" className={styles.navLink}>
+              🏆 리더보드
+            </a>
+            <a href="/goals" className={styles.navLink}>
+              🎯 목표
+            </a>
+            <a href="/social" className={styles.navLink}>
+              👥 소셜
+            </a>
+            <a href="/messages" className={styles.navLink}>
+              💬 메시지
+            </a>
+          </nav>
+        )}
+
         <div className={styles.authButtons}>
           {user ? (
             <>
-              <div className={styles.userInfo}>
+              <UserLevelBadge userId={user.id} />
+              <div className={styles.userInfo} onClick={handleProfileClick}>
                 <span className={styles.userName}>{user.name}</span>
                 {user.profileImage && (
                   <img

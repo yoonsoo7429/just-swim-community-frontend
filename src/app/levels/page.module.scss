@@ -1,0 +1,340 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.loading,
+.loginRequired {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+
+  h2 {
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  h1 {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 18px;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+}
+
+.myProgress {
+  margin-bottom: 50px;
+
+  h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 24px;
+  }
+}
+
+.leaderboard {
+  margin-bottom: 50px;
+
+  h2 {
+    margin: 0 0 24px 0;
+    color: #333;
+    font-size: 24px;
+  }
+}
+
+.topUsers {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  &:nth-child(1) {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+    color: #333;
+    border: 3px solid #ffd700;
+  }
+
+  &:nth-child(2) {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+    color: #333;
+    border: 3px solid #c0c0c0;
+  }
+
+  &:nth-child(3) {
+    background: linear-gradient(135deg, #cd7f32 0%, #deb887 100%);
+    color: #333;
+    border: 3px solid #cd7f32;
+  }
+}
+
+.rank {
+  font-size: 24px;
+  font-weight: 800;
+  min-width: 40px;
+  text-align: center;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatarText {
+    font-size: 20px;
+    font-weight: 600;
+    color: #666;
+  }
+}
+
+.details {
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .title {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    opacity: 0.8;
+  }
+}
+
+.levelInfo {
+  text-align: right;
+
+  .level {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .xp {
+    display: block;
+    font-size: 14px;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+}
+
+.allLevels {
+  h2 {
+    margin: 0 0 24px 0;
+    color: #333;
+    font-size: 24px;
+  }
+}
+
+.levelGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.levelCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  border: 2px solid transparent;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  &.achieved {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f8fff9 0%, #e6f7e6 100%);
+  }
+
+  &.locked {
+    opacity: 0.7;
+    background: #f8f9fa;
+  }
+}
+
+.levelHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.levelIcon {
+  font-size: 32px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 50%;
+}
+
+.levelDetails {
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .levelTitle {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+  }
+}
+
+.requirements {
+  margin-bottom: 16px;
+
+  .xpRequired {
+    font-size: 14px;
+    color: #007bff;
+    background: rgba(0, 123, 255, 0.1);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+}
+
+.perks {
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+
+    li {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 4px;
+      line-height: 1.4;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.achievedBadge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #28a745;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+  }
+
+  .header p {
+    font-size: 16px;
+  }
+
+  .userCard {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .rank {
+    font-size: 20px;
+    min-width: 32px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .details h3 {
+    font-size: 16px;
+  }
+
+  .levelInfo .level {
+    font-size: 14px;
+  }
+
+  .levelGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .levelCard {
+    padding: 20px;
+  }
+}

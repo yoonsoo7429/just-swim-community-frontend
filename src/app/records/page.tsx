@@ -8,6 +8,8 @@ import RecordCard from "@/components/records/RecordCard/RecordCard";
 import ShareRecordModal from "@/components/records/ShareRecordModal";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
+import BadgeNotification from "@/components/badges/BadgeNotification";
+import LevelUpNotification from "@/components/levels/LevelUpNotification";
 import { swimmingAPI, communityAPI } from "@/utils/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { SwimmingRecord } from "@/types";
@@ -34,6 +36,9 @@ export default function RecordsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [newBadges, setNewBadges] = useState([]);
+  const [levelUpInfo, setLevelUpInfo] = useState(null);
+  const [challengeUpdate, setChallengeUpdate] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -96,9 +101,26 @@ export default function RecordsPage() {
       setSubmitting(true);
       const response = await swimmingAPI.createRecord(recordData);
 
+      // 응답 구조 확인 및 배지 처리
+      const result = response.data;
+
+      // 새로운 배지가 있으면 알림 표시
+      if (result.newBadges && result.newBadges.length > 0) {
+        setNewBadges(result.newBadges);
+      }
+
+      // 레벨업이 있으면 알림 표시
+      if (result.levelUp && result.levelUp.leveledUp) {
+        setLevelUpInfo(result.levelUp);
+      }
+
+      // 챌린지 진행도 업데이트 알림
+      setChallengeUpdate("챌린지 진행도가 업데이트되었습니다! 🏆");
+
       // 새로 생성된 기록에 공유 상태 추가 (기본적으로 공유되지 않음)
+      const recordResponse = result.record || result; // 백엔드 응답 구조에 따라 조정
       const newRecord: RecordWithShareStatus = {
-        ...response.data,
+        ...recordResponse,
         isShared: false,
         sharedPostId: undefined,
       };
@@ -362,6 +384,38 @@ export default function RecordsPage() {
           />
         )}
       </div>
+
+      {newBadges.length > 0 && (
+        <BadgeNotification
+          newBadges={newBadges}
+          onClose={() => setNewBadges([])}
+        />
+      )}
+
+      {levelUpInfo && (
+        <LevelUpNotification
+          oldLevel={levelUpInfo.oldLevel}
+          newLevel={levelUpInfo.newLevel}
+          newTitle={levelUpInfo.newTitle || `레벨 ${levelUpInfo.newLevel}`}
+          xpGained={levelUpInfo.xpAdded}
+          onClose={() => setLevelUpInfo(null)}
+        />
+      )}
+
+      {challengeUpdate && (
+        <div className={styles.challengeNotification}>
+          <div className={styles.notificationContent}>
+            <span className={styles.notificationIcon}>🏆</span>
+            <span className={styles.notificationText}>{challengeUpdate}</span>
+            <button
+              className={styles.notificationClose}
+              onClick={() => setChallengeUpdate(null)}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

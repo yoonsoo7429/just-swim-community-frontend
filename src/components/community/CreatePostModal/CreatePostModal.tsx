@@ -5,6 +5,7 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { swimmingAPI } from "@/utils/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { apiClient } from "@/utils/apiClient";
 import styles from "./styles.module.scss";
 
 interface CreatePostModalProps {
@@ -15,6 +16,7 @@ interface CreatePostModalProps {
     content: string;
     category: PostCategory;
     swimmingRecordId?: string;
+    challengeId?: number;
   }) => void;
 }
 
@@ -40,11 +42,15 @@ export default function CreatePostModal({
   const [myRecords, setMyRecords] = useState<SwimmingRecord[]>([]);
   const [selectedRecordId, setSelectedRecordId] = useState<string>("");
   const [showRecordSelector, setShowRecordSelector] = useState(false);
+  const [challenges, setChallenges] = useState<any[]>([]);
+  const [selectedChallengeId, setSelectedChallengeId] = useState<
+    number | undefined
+  >(undefined);
 
   useEffect(() => {
-    if (isOpen && category === "기록 공유") {
-      fetchMyRecords();
-    }
+    if (!isOpen) return;
+    if (category === "기록 공유") fetchMyRecords();
+    if (category === "챌린지") fetchPublicChallenges();
   }, [isOpen, category]);
 
   const fetchMyRecords = async () => {
@@ -53,6 +59,17 @@ export default function CreatePostModal({
       setMyRecords(response.data);
     } catch (error) {
       console.error("수영 기록 조회 실패:", error);
+    }
+  };
+
+  const fetchPublicChallenges = async () => {
+    try {
+      const res = await apiClient.get("/social/challenges/public", {
+        params: { status: "active" },
+      });
+      setChallenges(res.data || []);
+    } catch (error) {
+      console.error("챌린지 목록 조회 실패:", error);
     }
   };
 
@@ -78,6 +95,7 @@ export default function CreatePostModal({
         category,
         swimmingRecordId:
           category === "기록 공유" ? selectedRecordId : undefined,
+        challengeId: category === "챌린지" ? selectedChallengeId : undefined,
       });
       handleClose();
     } catch (error) {
@@ -94,6 +112,7 @@ export default function CreatePostModal({
     setCategory("기록 공유");
     setSelectedRecordId("");
     setShowRecordSelector(false);
+    setSelectedChallengeId(undefined);
     onClose();
   };
 
@@ -104,6 +123,9 @@ export default function CreatePostModal({
     } else {
       setShowRecordSelector(false);
       setSelectedRecordId("");
+    }
+    if (newCategory !== "챌린지") {
+      setSelectedChallengeId(undefined);
     }
   };
 
@@ -174,6 +196,31 @@ export default function CreatePostModal({
                 <option key={record.id} value={record.id}>
                   {formatDate(record.sessionDate || record.createdAt)} -{" "}
                   {record.totalDistance}m
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {category === "챌린지" && (
+          <div className={styles.formGroup}>
+            <label htmlFor="challenge" className={styles.label}>
+              챌린지 연결(선택)
+            </label>
+            <select
+              id="challenge"
+              value={selectedChallengeId ?? ""}
+              onChange={(e) =>
+                setSelectedChallengeId(
+                  e.target.value ? Number(e.target.value) : undefined
+                )
+              }
+              className={styles.select}
+            >
+              <option value="">연결하지 않음</option>
+              {challenges.map((info) => (
+                <option key={info.challenge.id} value={info.challenge.id}>
+                  {info.challenge.title} (참가자 {info.participantCount})
                 </option>
               ))}
             </select>

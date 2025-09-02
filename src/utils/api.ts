@@ -141,6 +141,9 @@ export const postsAPI = {
     apiClient.get(`/posts/swimming-record/${recordId}/status`),
   getTrainingProgramShareStatus: (programId: number) =>
     apiClient.get(`/posts/training-program/${programId}/status`),
+  // Challenges in community posts
+  getPublicChallenges: (status?: string) =>
+    apiClient.get(`/social/challenges/public`, { params: { status } }),
 };
 
 // Comments API - 백엔드에 구현됨 (posts 컨트롤러 내부)

@@ -412,6 +412,24 @@ export default function PostCard({
             💬 {localPost.comments || 0}
           </span>
         </div>
+        {localPost.category === "챌린지" && (
+          <div className={styles.challengeActions}>
+            <a
+              href="/social"
+              className={styles.challengeActionBtn}
+              onClick={(e) => e.stopPropagation()}
+            >
+              🏆 챌린지 보기
+            </a>
+            <a
+              href="/goals?highlight=challenge"
+              className={styles.challengeActionBtn}
+              onClick={(e) => e.stopPropagation()}
+            >
+              🎯 목표로 보기
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
