@@ -87,18 +87,32 @@ const Header: React.FC<HeaderProps> = ({ className = "" }) => {
 
         {user && (
           <nav className={styles.navigation}>
-            <a href="/leaderboards" className={styles.navLink}>
-              🏆 리더보드
+            <a href="/records" className={styles.navLink}>
+              📊 기록
             </a>
-            <a href="/goals" className={styles.navLink}>
-              🎯 목표
+            <a href="/programs" className={styles.navLink}>
+              🏋️‍♂️ 훈련
             </a>
-            <a href="/social" className={styles.navLink}>
-              👥 소셜
+            <a href="/community" className={styles.navLink}>
+              👥 커뮤니티
             </a>
-            <a href="/messages" className={styles.navLink}>
-              💬 메시지
-            </a>
+            <div className={styles.dropdown}>
+              <button className={styles.dropdownToggle}>📋 더보기</button>
+              <div className={styles.dropdownMenu}>
+                <a href="/leaderboards" className={styles.dropdownItem}>
+                  🏆 리더보드
+                </a>
+                <a href="/goals" className={styles.dropdownItem}>
+                  🎯 목표
+                </a>
+                <a href="/social" className={styles.dropdownItem}>
+                  👥 소셜
+                </a>
+                <a href="/messages" className={styles.dropdownItem}>
+                  💬 메시지
+                </a>
+              </div>
+            </div>
           </nav>
         )}
 
